@@ -1,0 +1,26 @@
+language: c
+before_script:
+  - git clone https://github.com/asdf-vm/asdf.git asdf
+  - . asdf/asdf.sh
+script:
+  - asdf plugin-add consul ./
+  - asdf plugin-add nomad ./
+  - asdf plugin-add packer ./
+  - asdf plugin-add serf ./
+  - asdf plugin-add terraform ./
+  - asdf plugin-add vault ./
+  - asdf list-all consul
+  - asdf list-all nomad
+  - asdf list-all packer
+  - asdf list-all serf
+  - asdf list-all terraform
+  - asdf list-all vault
+  - asdf plugin-test consul ./ 'consul version'
+  - asdf plugin-test nomad ./ 'nomad version'
+  - asdf plugin-test packer ./ 'packer version'
+  - asdf plugin-test serf ./ 'serf version'
+  - asdf plugin-test terraform ./ 'terraform version'
+  - asdf plugin-test vault ./ 'vault version'
+os:
+  - linux
+  - osx

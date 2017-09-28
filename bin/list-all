@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+
+set \
+  -o nounset \
+  -o pipefail \
+  -o errexit
+
+# detect the HashiCorp tool name
+readonly __dirname="$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+readonly toolname="$(basename "$(dirname "${__dirname}")")"
+
+list_all () {
+  local versions=""
+  local version
+  local v
+
+  for v in $(curl -s "https://releases.hashicorp.com/${toolname}/" \
+      | grep -o "${toolname}_[0-9]\+\.[0-9]\+\.[0-9]\+\(-[a-z]\+[0-9]*\)\?"); do
+    version="${v#${toolname}_}"
+    if [[ -z "${versions}" ]]; then
+      versions="${version}"
+    else
+      versions="${version} ${versions}"
+    fi
+  done
+  echo "${versions}"
+}
+
+list_all
