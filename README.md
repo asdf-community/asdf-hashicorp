@@ -7,7 +7,7 @@ HashiCorp tools plugin for [asdf](https://github.com/asdf-vm/asdf) version manag
 ## Install
 
 ```
-asdf plugin-add consul|nomad|packer|terraform|vault https://github.com/Banno/asdf-hashicorp.git
+asdf plugin-add consul|nomad|packer|serf|terraform|vault https://github.com/Banno/asdf-hashicorp.git
 ```
 
 ## Use
