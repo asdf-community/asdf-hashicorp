@@ -10,7 +10,7 @@ set \
 : ${ASDF_INSTALL_VERSION?}
 : ${ASDF_INSTALL_PATH?}
 
-# detect the HashiCorp tool name
+# detect the tool name
 readonly __dirname="$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly toolname="$(basename "$(dirname "${__dirname}")")"
 
