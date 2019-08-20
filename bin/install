@@ -44,7 +44,12 @@ install () {
 }
 
 get_arch () {
-  uname | tr '[:upper:]' '[:lower:]'
+  if [ "$OSTYPE" == "msys" ]
+  then
+    echo windows
+  else
+    uname | tr '[:upper:]' '[:lower:]'
+  fi
 }
 
 get_filename () {
