@@ -27,6 +27,28 @@ install () {
   local -r download_url="$(get_download_url "${version}")"
   local -r download_path="${TMP_DOWNLOAD_DIR}/$(get_filename "${version}")"
 
+  local -r checksum_url="$(get_checksum_url "${version}")"
+  local -r signature_url="$(get_signature_url "${version}")"
+
+  echo "Downloading checksums and signatures"
+  if curl -fs "${checksum_url}" -o "${TMP_DOWNLOAD_DIR}/SHA256SUMS"; then
+      if curl -fs "${signature_url}" -o "${TMP_DOWNLOAD_DIR}/SHA256SUMS.sig"; then
+
+	  echo "Validating checksums against signature"
+	  gpg --verify ${TMP_DOWNLOAD_DIR}/SHA256SUMS.sig ${TMP_DOWNLOAD_DIR}/SHA256SUMS
+	  if [ $? -ne 0 ]; then
+	      echo "Signature validation failed" >&2
+	      exit 1
+	  else
+	      echo "Signature validated."
+	  fi
+      else
+	  echo "Failed to download signature file" >&2
+      fi
+  else
+      echo "Failed to download checksums" >&2
+  fi
+  
   echo "Downloading ${toolname} version ${version} from ${download_url}"
   if curl -fs "${download_url}" -o "${download_path}"; then
     echo "Cleaning ${toolname} previous binaries"
@@ -35,6 +57,9 @@ install () {
     echo "Creating ${toolname} bin directory"
     mkdir -p "${bin_install_path}"
 
+    # Validate
+    echo "Validating download checksum... $(validate_checksum "noop")"
+    
     echo "Extracting ${toolname} archive"
     unzip -qq "${download_path}" -d "${bin_install_path}"
   else
@@ -53,10 +78,39 @@ get_filename () {
   echo "${toolname}_${version}_${platform}_amd64.zip"
 }
 
+get_checksum_filename () {
+  local -r version="$1"
+  echo "${toolname}_${version}_SHA256SUMS"
+}
+
 get_download_url () {
   local -r version="$1"
   local -r filename="$(get_filename "${version}")"
   echo "https://releases.hashicorp.com/${toolname}/${version}/${filename}"
+}
+
+get_checksum_url () {
+  local -r version="$1"
+  local -r filename="$(get_checksum_filename "${version}")"
+  echo "https://releases.hashicorp.com/${toolname}/${version}/${filename}"
+}
+
+get_signature_url () {
+  local -r version="$1"
+  local -r filename="$(get_checksum_filename "${version}")"
+  echo "https://releases.hashicorp.com/${toolname}/${version}/${filename}.sig"
+}
+
+validate_checksum() { 
+    local dir=$(dirname "$0")
+    cd ${TMP_DOWNLOAD_DIR}
+    grep $(get_arch) SHA256SUMS | shasum -a 256 -c -
+    if [ $? -ne 0 ]; then
+	echo "Checksum failed verification!"
+	cd $dir
+	exit 1
+    fi
+    cd $dir
 }
 
 install "${ASDF_INSTALL_TYPE}" "${ASDF_INSTALL_VERSION}" "${ASDF_INSTALL_PATH}"
