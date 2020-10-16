@@ -19,14 +19,14 @@ script:
   - asdf list-all terraform
   - asdf list-all vault
   - asdf list-all waypoint
-  - asdf plugin-test boundary ./ 'boundary version'
-  - asdf plugin-test consul ./ 'consul version'
-  - asdf plugin-test nomad ./ 'nomad version'
-  - asdf plugin-test packer ./ 'packer version'
-  - asdf plugin-test serf ./ 'serf version'
-  - asdf plugin-test terraform ./ 'terraform version'
-  - asdf plugin-test vault ./ 'vault version'
-  - asdf plugin-test waypoint ./ 'waypoint version'
+  - asdf plugin-test boundary ./ --asdf-plugin-gitref $TRAVIS_COMMIT 'boundary version'
+  - asdf plugin-test consul ./ --asdf-plugin-gitref $TRAVIS_COMMIT 'consul version'
+  - asdf plugin-test nomad ./ --asdf-plugin-gitref $TRAVIS_COMMIT 'nomad version'
+  - asdf plugin-test packer ./ --asdf-plugin-gitref $TRAVIS_COMMIT 'packer version'
+  - asdf plugin-test serf ./ --asdf-plugin-gitref $TRAVIS_COMMIT 'serf version'
+  - asdf plugin-test terraform ./ --asdf-plugin-gitref $TRAVIS_COMMIT 'terraform version'
+  - asdf plugin-test vault ./ --asdf-plugin-gitref $TRAVIS_COMMIT 'vault version'
+  - asdf plugin-test waypoint ./ --asdf-plugin-gitref $TRAVIS_COMMIT 'waypoint version'
 os:
   - linux
   - osx
