@@ -8,7 +8,7 @@ HashiCorp tools plugin for [asdf](https://github.com/asdf-vm/asdf) version manag
 
 Example:
 ```
-asdf plugin-add terraform https://github.com/Banno/asdf-hashicorp.git
+asdf plugin-add boundary|consul|nomad|packer|sentinel|serf|terraform|vault|waypoint https://github.com/Banno/asdf-hashicorp.git
 ```
 
 ## Use
