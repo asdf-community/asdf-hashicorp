@@ -43,14 +43,26 @@ install () {
   fi
 }
 
-get_arch () {
+get_platform () {
   uname | tr '[:upper:]' '[:lower:]'
+}
+
+get_arch () {
+  local -r machine="$(uname -m)"
+  if [[ $machine == *"arm"* ]]; then
+    echo "arm";
+  elif [[ $machine == *"386"* ]]; then
+    echo "386";
+  else
+    echo "amd64";
+  fi
 }
 
 get_filename () {
   local -r version="$1"
-  local -r platform="$(get_arch)"
-  echo "${toolname}_${version}_${platform}_amd64.zip"
+  local -r platform="$(get_platform)"
+  local -r arch="$(get_arch)"
+  echo "${toolname}_${version}_${platform}_${arch}.zip"
 }
 
 get_download_url () {
