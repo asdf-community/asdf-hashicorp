@@ -25,7 +25,7 @@ script:
   - asdf plugin-test packer ./ 'packer version'
   - asdf plugin-test serf ./ 'serf version'
   - asdf plugin-test terraform ./ 'terraform version'
-  - asdf plugin-test waypoint ./ 'terraform waypoint'
+  - asdf plugin-test waypoint ./ 'waypoint version'
   - asdf plugin-test vault ./ 'vault version'
 os:
   - linux
