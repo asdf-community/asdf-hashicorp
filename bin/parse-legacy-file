@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+get_legacy_version() {
+    local -r plugin_dir="$1"
+    local -r tf_version_file="$2"
+    local -r terraform_dir="$ASDF_DIR/plugins/terraform"
+
+    if [[ $plugin_dir =~ $terraform_dir ]]; then
+      # Get version from .terraform-version file (used by tfenv)
+      if [[ -r ${tf_version_file} ]]; then
+          cat "${tf_version_file}"
+      fi
+    fi
+}
+
+
+get_legacy_version "$0" "$1"
