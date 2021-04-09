@@ -3,6 +3,7 @@ before_script:
   - git clone https://github.com/asdf-vm/asdf.git asdf
   - . asdf/asdf.sh
 script:
+  - asdf plugin-add boundary ./
   - asdf plugin-add consul ./
   - asdf plugin-add nomad ./
   - asdf plugin-add packer ./
@@ -10,6 +11,8 @@ script:
   - asdf plugin-add serf ./
   - asdf plugin-add terraform ./
   - asdf plugin-add vault ./
+  - asdf plugin-add waypoint ./
+  - asdf list-all boundary
   - asdf list-all consul
   - asdf list-all nomad
   - asdf list-all packer
@@ -17,13 +20,19 @@ script:
   - asdf list-all serf
   - asdf list-all terraform
   - asdf list-all vault
-  - asdf plugin-test consul ./ 'consul version'
-  - asdf plugin-test nomad ./ 'nomad version'
-  - asdf plugin-test packer ./ 'packer version'
-  - asdf plugin-test sentinel ./ 'sentinel version'
-  - asdf plugin-test serf ./ 'serf version'
-  - asdf plugin-test terraform ./ 'terraform version'
-  - asdf plugin-test vault ./ 'vault version'
+  - asdf list-all waypoint
+  - asdf plugin-test boundary ./ --asdf-plugin-gitref $TRAVIS_COMMIT 'boundary version'
+  - asdf plugin-test consul ./ --asdf-plugin-gitref $TRAVIS_COMMIT 'consul version'
+  - asdf plugin-test nomad ./ --asdf-plugin-gitref $TRAVIS_COMMIT 'nomad version'
+  - asdf plugin-test packer ./ --asdf-plugin-gitref $TRAVIS_COMMIT 'packer version'
+  - asdf plugin-test sentinel ./ --asdf-plugin-gitref $TRAVIS_COMMIT 'sentinel version'
+  - asdf plugin-test serf ./ --asdf-plugin-gitref $TRAVIS_COMMIT 'serf version'
+  - asdf plugin-test terraform ./ --asdf-plugin-gitref $TRAVIS_COMMIT 'terraform version'
+  - asdf plugin-test vault ./ --asdf-plugin-gitref $TRAVIS_COMMIT 'vault version'
+  - asdf plugin-test waypoint ./ --asdf-plugin-gitref $TRAVIS_COMMIT 'waypoint version'
 os:
   - linux
   - osx
+arch:
+  - amd64
+  - arm64
