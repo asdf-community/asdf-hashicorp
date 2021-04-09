@@ -30,3 +30,6 @@ script:
 os:
   - linux
   - osx
+arch:
+  - amd64
+  - arm64
