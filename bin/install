@@ -49,12 +49,14 @@ get_platform () {
 
 get_arch () {
   local -r machine="$(uname -m)"
-  if [[ $machine == *"arm"* ]]; then
-    echo "arm";
+  if [[ $machine == "arm64" ]] || [[ $machine == "aarch64" ]]; then
+    echo "arm64"
+  elif [[ $machine == *"arm"* ]] || [[ $machine == *"aarch"* ]]; then
+    echo "arm"
   elif [[ $machine == *"386"* ]]; then
-    echo "386";
+    echo "386"
   else
-    echo "amd64";
+    echo "amd64"
   fi
 }
 
@@ -68,7 +70,13 @@ get_filename () {
 get_download_url () {
   local -r version="$1"
   local -r filename="$(get_filename "${version}")"
-  echo "https://releases.hashicorp.com/${toolname}/${version}/${filename}"
+  local -r releases_host="https://releases.hashicorp.com"
+
+  if ! curl -fs "${releases_host}/${toolname}/${version}/${filename}" > /dev/null && [[ "${filename}" == *"arm64"* ]]; then
+    echo "https://releases.hashicorp.com/${toolname}/${version}/${filename//arm64/arm}"
+  else
+    echo "https://releases.hashicorp.com/${toolname}/${version}/${filename}"
+  fi
 }
 
 install "${ASDF_INSTALL_TYPE}" "${ASDF_INSTALL_VERSION}" "${ASDF_INSTALL_PATH}"
