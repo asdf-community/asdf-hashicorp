@@ -43,25 +43,44 @@ install () {
   fi
 }
 
-get_arch () {
-  if [ "$OSTYPE" == "msys" ]
-  then
+get_platform () {
+  if [ "$OSTYPE" == "msys" ]; then
     echo windows
   else
     uname | tr '[:upper:]' '[:lower:]'
   fi
 }
 
+get_arch () {
+  local -r machine="$(uname -m)"
+  if [[ $machine == "arm64" ]] || [[ $machine == "aarch64" ]]; then
+    echo "arm64"
+  elif [[ $machine == *"arm"* ]] || [[ $machine == *"aarch"* ]]; then
+    echo "arm"
+  elif [[ $machine == *"386"* ]]; then
+    echo "386"
+  else
+    echo "amd64"
+  fi
+}
+
 get_filename () {
   local -r version="$1"
-  local -r platform="$(get_arch)"
-  echo "${toolname}_${version}_${platform}_amd64.zip"
+  local -r platform="$(get_platform)"
+  local -r arch="$(get_arch)"
+  echo "${toolname}_${version}_${platform}_${arch}.zip"
 }
 
 get_download_url () {
   local -r version="$1"
   local -r filename="$(get_filename "${version}")"
-  echo "https://releases.hashicorp.com/${toolname}/${version}/${filename}"
+  local -r releases_host="https://releases.hashicorp.com"
+
+  if ! curl -fs "${releases_host}/${toolname}/${version}/${filename}" > /dev/null && [[ "${filename}" == *"arm64"* ]]; then
+    echo "https://releases.hashicorp.com/${toolname}/${version}/${filename//arm64/arm}"
+  else
+    echo "https://releases.hashicorp.com/${toolname}/${version}/${filename}"
+  fi
 }
 
 install "${ASDF_INSTALL_TYPE}" "${ASDF_INSTALL_VERSION}" "${ASDF_INSTALL_PATH}"
