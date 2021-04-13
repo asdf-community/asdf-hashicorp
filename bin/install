@@ -1,14 +1,16 @@
 #!/usr/bin/env bash
 
-set \
-  -o nounset \
-  -o pipefail \
-  -o errexit
+set -Eeuo pipefail
+
+fail() {
+  echo "Fail: $*"
+  exit 1
+}
 
 # required environment variables
-: ${ASDF_INSTALL_TYPE?}
-: ${ASDF_INSTALL_VERSION?}
-: ${ASDF_INSTALL_PATH?}
+: "${ASDF_INSTALL_TYPE?}"
+: "${ASDF_INSTALL_VERSION?}"
+: "${ASDF_INSTALL_PATH?}"
 
 # detect the tool name
 readonly __dirname="$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -18,10 +20,14 @@ readonly toolname="$(basename "$(dirname "${__dirname}")")"
 readonly TMP_DOWNLOAD_DIR="$(mktemp -d -t "asdf_${toolname}_XXXXXX")"
 trap 'rm -rf "${TMP_DOWNLOAD_DIR?}"' EXIT
 
-install () {
+install() {
   local -r install_type="$1"
   local -r version="$2"
   local -r install_path="$3"
+
+  if [ "$install_type" != "version" ]; then
+    fail "asdf-hashicorp supports release installs only"
+  fi
 
   local -r bin_install_path="${install_path}/bin"
   local -r download_url="$(get_download_url "${version}")"
@@ -30,7 +36,7 @@ install () {
   echo "Downloading ${toolname} version ${version} from ${download_url}"
   if curl -fs "${download_url}" -o "${download_path}"; then
     echo "Cleaning ${toolname} previous binaries"
-    rm -rf "${bin_install_path}/${toolname}"
+    rm -rf "${bin_install_path:?}/${toolname}"
 
     echo "Creating ${toolname} bin directory"
     mkdir -p "${bin_install_path}"
@@ -43,7 +49,7 @@ install () {
   fi
 }
 
-get_platform () {
+get_platform() {
   if [ "$OSTYPE" == "msys" ]; then
     echo windows
   else
@@ -51,7 +57,7 @@ get_platform () {
   fi
 }
 
-get_arch () {
+get_arch() {
   local -r machine="$(uname -m)"
   if [[ $machine == "arm64" ]] || [[ $machine == "aarch64" ]]; then
     echo "arm64"
@@ -64,19 +70,19 @@ get_arch () {
   fi
 }
 
-get_filename () {
+get_filename() {
   local -r version="$1"
   local -r platform="$(get_platform)"
   local -r arch="$(get_arch)"
   echo "${toolname}_${version}_${platform}_${arch}.zip"
 }
 
-get_download_url () {
+get_download_url() {
   local -r version="$1"
   local -r filename="$(get_filename "${version}")"
   local -r releases_host="https://releases.hashicorp.com"
 
-  if ! curl -fs "${releases_host}/${toolname}/${version}/${filename}" > /dev/null && [[ "${filename}" == *"arm64"* ]]; then
+  if ! curl -fs "${releases_host}/${toolname}/${version}/${filename}" >/dev/null && [[ ${filename} == *"arm64"* ]]; then
     echo "https://releases.hashicorp.com/${toolname}/${version}/${filename//arm64/arm}"
   else
     echo "https://releases.hashicorp.com/${toolname}/${version}/${filename}"

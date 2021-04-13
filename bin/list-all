@@ -1,23 +1,20 @@
 #!/usr/bin/env bash
 
-set \
-  -o nounset \
-  -o pipefail \
-  -o errexit
+set -Eeuo pipefail
 
 # detect the tool name
 readonly __dirname="$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly toolname="$(basename "$(dirname "${__dirname}")")"
 
-list_all () {
+list_all() {
   local versions=""
   local version
   local v
 
-  for v in $(curl -s "https://releases.hashicorp.com/${toolname}/" \
-      | grep -o "${toolname}_[0-9]\+\.[0-9]\+\.[0-9]\+\(\(-\|+\)[a-z]\+[0-9]*\)*"); do
+  for v in $(curl -s "https://releases.hashicorp.com/${toolname}/" |
+    grep -o "${toolname}_[0-9]\+\.[0-9]\+\.[0-9]\+\(\(-\|+\)[a-z]\+[0-9]*\)*"); do
     version="${v#${toolname}_}"
-    if [[ -z "${versions}" ]]; then
+    if [[ -z ${versions} ]]; then
       versions="${version}"
     else
       versions="${version} ${versions}"
