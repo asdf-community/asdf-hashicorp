@@ -1,0 +1,81 @@
+name: Main workflow
+
+on:
+  pull_request:
+  push:
+  schedule:
+    - cron: 0 0 * * 5
+
+jobs:
+  plugin_test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - macos-latest
+          - ubuntu-latest
+        tool:
+          - boundary
+          - consul
+          - nomad
+          - packer
+          - sentinel
+          - serf
+          - terraform
+          - vault
+          - waypoint
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: asdf_plugin_test
+        uses: asdf-vm/actions/plugin-test@v1
+        with:
+          command: ${{ matrix.tool }} version
+          plugin: ${{ matrix.tool }}
+
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup asdf
+        uses: asdf-vm/actions/setup@v1
+
+      - name: Install bats-core
+        run: brew install bats-core
+
+      - name: Test plugin
+        run: |
+          asdf plugin-add terraform $GITHUB_WORKSPACE
+          make test
+        env:
+          GITHUB_API_TOKEN: ${{ github.token }}
+
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install ShellCheck
+        run: brew install shellcheck
+
+      - name: Run ShellCheck
+        run: make lint
+
+  format:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install shfmt
+        run: brew install shfmt
+
+      - name: Run shfmt
+        run: make fmt-check
