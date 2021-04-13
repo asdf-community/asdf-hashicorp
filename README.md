@@ -1,16 +1,31 @@
 # asdf-hashicorp
 
-[![Build Status](https://travis-ci.org/Banno/asdf-hashicorp.svg?branch=master)](https://travis-ci.org/Banno/asdf-hashicorp)
+[HashiCorp](https://www.hashicorp.com) plugin for asdf version manager
 
-HashiCorp tools plugin for [asdf](https://github.com/asdf-vm/asdf) version manager
+## Build History
 
-## Install
+[![Build history](https://buildstats.info/github/chart/asdf-community/asdf-hashicorp?branch=master)](https://github.com/asdf-community/asdf-hashicorp/actions)
 
-Example:
+## Installation
+
+```bash
+asdf plugin-add boundary https://github.com/asdf-community/asdf-hashicorp.git
+asdf plugin-add consul https://github.com/asdf-community/asdf-hashicorp.git
+asdf plugin-add nomad https://github.com/asdf-community/asdf-hashicorp.git
+asdf plugin-add packer https://github.com/asdf-community/asdf-hashicorp.git
+asdf plugin-add sentinel https://github.com/asdf-community/asdf-hashicorp.git
+asdf plugin-add serf https://github.com/asdf-community/asdf-hashicorp.git
+asdf plugin-add terraform https://github.com/asdf-community/asdf-hashicorp.git
+asdf plugin-add vault https://github.com/asdf-community/asdf-hashicorp.git
+asdf plugin-add waypoint https://github.com/asdf-community/asdf-hashicorp.git
 ```
-asdf plugin-add boundary|consul|nomad|packer|sentinel|serf|terraform|vault|waypoint https://github.com/Banno/asdf-hashicorp.git
-```
 
-## Use
+## Usage
 
-Check out the [asdf](https://github.com/asdf-vm/asdf) readme for instructions on how to install and manage versions of HashiCorp tools.
+Check [asdf](https://github.com/asdf-vm/asdf) readme for instructions on how to
+install & manage versions.
+
+## License
+
+Licensed under the
+[MIT license](https://github.com/asdf-community/asdf-hashicorp/blob/master/LICENSE).
