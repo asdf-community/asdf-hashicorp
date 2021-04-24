@@ -35,6 +35,14 @@ install() {
 
   echo "Downloading ${toolname} version ${version} from ${download_url}"
   if curl -fs "${download_url}" -o "${download_path}"; then
+     
+    echo "Checking signatures"
+    if $(check_sig $version); then
+        echo "OK"
+    else
+      exit 100
+    fi
+
     echo "Cleaning ${toolname} previous binaries"
     rm -rf "${bin_install_path:?}/${toolname}"
 
@@ -88,5 +96,23 @@ get_download_url() {
     echo "https://releases.hashicorp.com/${toolname}/${version}/${filename}"
   fi
 }
+
+check_sig() {
+  local -r distributer="https://releases.hashicorp.com"
+  local -r sha256sums_url="${distributer}/${toolname}/${version}/${toolname}_${version}_SHA256SUMS"
+  local -r signature_url="${distributer}/${toolname}/${version}/${toolname}_${version}_SHA256SUMS.sig"
+
+  curl -s $sha256sums_url -o $TMP_DOWNLOAD_DIR/$(basename $sha256sums_url)
+  curl -s $signature_url -o $TMP_DOWNLOAD_DIR/$(basename $signature_url)
+
+  gpg --keyserver pool.sks-keyservers.net\
+      --recv-keys "C874 011F 0AB4 0511 0D02 1055 3436 5D94 72D7 468F"
+
+  cd $TMP_DOWNLOAD_DIR;
+  gpg --verify-files $TMP_DOWNLOAD_DIR/$(basename $signature_url)
+  sha256sum --ignore-missing -c $TMP_DOWNLOAD_DIR/$(basename sha256sums_url)
+  { echo "Verification ERROR" > /dev/stderr; exit 100 ; }
+}
+
 
 install "${ASDF_INSTALL_TYPE}" "${ASDF_INSTALL_VERSION}" "${ASDF_INSTALL_PATH}"

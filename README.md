@@ -4,20 +4,20 @@
 
 ## Build History
 
-[![Build history](https://buildstats.info/github/chart/asdf-community/asdf-hashicorp?branch=master)](https://github.com/asdf-community/asdf-hashicorp/actions)
+[![Build history](https://buildstats.info/github/chart/krysopath/asdf-hashicorp?branch=master)](https://github.com/asdf-community/asdf-hashicorp/actions)
 
 ## Installation
 
 ```bash
-asdf plugin-add boundary https://github.com/asdf-community/asdf-hashicorp.git
-asdf plugin-add consul https://github.com/asdf-community/asdf-hashicorp.git
-asdf plugin-add nomad https://github.com/asdf-community/asdf-hashicorp.git
-asdf plugin-add packer https://github.com/asdf-community/asdf-hashicorp.git
-asdf plugin-add sentinel https://github.com/asdf-community/asdf-hashicorp.git
-asdf plugin-add serf https://github.com/asdf-community/asdf-hashicorp.git
-asdf plugin-add terraform https://github.com/asdf-community/asdf-hashicorp.git
-asdf plugin-add vault https://github.com/asdf-community/asdf-hashicorp.git
-asdf plugin-add waypoint https://github.com/asdf-community/asdf-hashicorp.git
+asdf plugin-add boundary https://github.com/krysopath/asdf-hashicorp.git
+asdf plugin-add consul https://github.com/krysopath/asdf-hashicorp.git
+asdf plugin-add nomad https://github.com/krysopath/asdf-hashicorp.git
+asdf plugin-add packer https://github.com/krysopath/asdf-hashicorp.git
+asdf plugin-add sentinel https://github.com/krysopath/asdf-hashicorp.git
+asdf plugin-add serf https://github.com/krysopath/asdf-hashicorp.git
+asdf plugin-add terraform https://github.com/krysopath/asdf-hashicorp.git
+asdf plugin-add vault https://github.com/krysopath/asdf-hashicorp.git
+asdf plugin-add waypoint https://github.com/krysopath/asdf-hashicorp.git
 ```
 
 ## Usage
@@ -28,4 +28,4 @@ install & manage versions.
 ## License
 
 Licensed under the
-[MIT license](https://github.com/asdf-community/asdf-hashicorp/blob/master/LICENSE).
+[MIT license](https://github.com/krysopath/asdf-hashicorp/blob/master/LICENSE).
