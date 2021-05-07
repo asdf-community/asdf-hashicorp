@@ -3,8 +3,10 @@
 set -Eeuo pipefail
 
 # detect the tool name
-readonly __dirname="$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-readonly toolname="$(basename "$(dirname "${__dirname}")")"
+__dirname="$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+toolname="$(basename "$(dirname "${__dirname}")")"
+readonly __dirname
+readonly toolname
 
 list_all() {
   local versions=""

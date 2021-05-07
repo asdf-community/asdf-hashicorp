@@ -13,11 +13,14 @@ fail() {
 : "${ASDF_INSTALL_PATH?}"
 
 # detect the tool name
-readonly __dirname="$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-readonly toolname="$(basename "$(dirname "${__dirname}")")"
+__dirname="$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+toolname="$(basename "$(dirname "${__dirname}")")"
+readonly __dirname
+readonly toolname
 
 # make a temporary download directory with a cleanup hook
-readonly TMP_DOWNLOAD_DIR="$(mktemp -d -t "asdf_${toolname}_XXXXXX")"
+TMP_DOWNLOAD_DIR="$(mktemp -d -t "asdf_${toolname}_XXXXXX")"
+readonly TMP_DOWNLOAD_DIR
 trap 'rm -rf "${TMP_DOWNLOAD_DIR?}"' EXIT
 
 install() {
