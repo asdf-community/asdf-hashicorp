@@ -45,7 +45,7 @@ jobs:
         uses: asdf-vm/actions/setup@v1
 
       - name: Install bats-core
-        run: brew install bats-core
+        run: brew install --build-from-source bats-core
 
       - name: Test plugin
         run: |
