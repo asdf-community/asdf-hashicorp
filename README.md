@@ -25,9 +25,6 @@ asdf plugin-add waypoint https://github.com/asdf-community/asdf-hashicorp.git
 Check [asdf](https://github.com/asdf-vm/asdf) readme for instructions on how to
 install & manage versions.
 
-### Environment Variable Options
-- ASDF_HASHICORP_SKIP_VERIFY: skip verifying checksums and signatures
-
 ## License
 
 Licensed under the
