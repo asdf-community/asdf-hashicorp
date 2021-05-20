@@ -41,14 +41,15 @@ verify() {
   local -r version="$1"
   local -r platform="$(get_platform)"
   local -r arch="$(get_arch)"
-  local -r gpg_path="${TMP_DOWNLOAD_DIR}/$(get_gpg_filename "${version}")"
   local -r checksum_path="${TMP_DOWNLOAD_DIR}/$(get_checksum_filename "${version}")"
+  local -r gpg_path="${TMP_DOWNLOAD_DIR}/$(get_gpg_filename "${version}")"
 
   gnupg --import "${__dirname}/../hashicorp.asc"
   if ! curl -fs "$(get_download_url "${version}" "checksum")" -o "${checksum_path}"; then
     echo "couldn't download checksum file" >&2
   fi
-  if ! curl -fs "$(get_download_url "${version}" "gpg")" -o "${gpg_path}"; then
+  if ! curl -fs "$(get_download_url "${version}" "gpg" "72D7468F")" -o "${gpg_path}" &&
+    ! curl -fs "$(get_download_url "${version}" "gpg")" -o "${gpg_path}"; then
     echo "couldn't download gpg signature file" >&2
   fi
 
@@ -133,12 +134,18 @@ get_checksum_filename() {
 
 get_gpg_filename() {
   local -r version="$1"
-  echo "${toolname}_${version}_SHA256SUMS.sig"
+  local -r keyid="${2:-}"
+  if [[ -n ${keyid} ]]; then
+    echo "${toolname}_${version}_SHA256SUMS.${keyid}.sig"
+  else
+    echo "${toolname}_${version}_SHA256SUMS.sig"
+  fi
 }
 
 get_download_url() {
   local -r version="$1"
   local -r type="$2"
+  local -r keyid="${3:-}"
 
   case "${type}" in
     zip)
@@ -148,7 +155,7 @@ get_download_url() {
       local -r filename="$(get_checksum_filename "${version}")"
       ;;
     gpg)
-      local -r filename="$(get_gpg_filename "${version}")"
+      local -r filename="$(get_gpg_filename "${version}" "${keyid}")"
       ;;
     *)
       echo "${type} is not a valid type of URL to download" >&2
