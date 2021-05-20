@@ -24,6 +24,11 @@ readonly TMP_DOWNLOAD_DIR
 trap 'rm -rf "${TMP_DOWNLOAD_DIR?}"' EXIT
 
 gnupg() {
+  # This is one of the rare times when we want word splitting, so we can supply
+  # a caller-specified number of arguments to this function to `gpg` as
+  # arguments.
+  #
+  # shellcheck disable=SC2068
   GNUPGHOME="${TMP_DOWNLOAD_DIR}" gpg $@
 }
 
@@ -33,17 +38,16 @@ verify() {
   #
   # Returns 1 on GPG signature verification error, 2 on checksum error.
   local -r version="$1"
-  local -r zip_path="$2"
   local -r platform="$(get_platform)"
   local -r arch="$(get_arch)"
   local -r gpg_path="${TMP_DOWNLOAD_DIR}/$(get_gpg_filename "${version}")"
   local -r checksum_path="${TMP_DOWNLOAD_DIR}/$(get_checksum_filename "${version}")"
 
   gnupg --import "${__dirname}/../hashicorp.asc"
-  if ! curl -fs "$(get_download_url "${version}" "checksum" )" -o "${checksum_path}"; then
+  if ! curl -fs "$(get_download_url "${version}" "checksum")" -o "${checksum_path}"; then
     echo "couldn't download checksum file" >&2
   fi
-  if ! curl -fs "$(get_download_url "${version}" "gpg" )" -o "${gpg_path}"; then
+  if ! curl -fs "$(get_download_url "${version}" "gpg")" -o "${gpg_path}"; then
     echo "couldn't download gpg signature file" >&2
   fi
 
@@ -51,7 +55,7 @@ verify() {
     echo "gpg verification failed" >&2
     return 1
   fi
-  if ! (cd "${TMP_DOWNLOAD_DIR}" && shasum -a 256 -c <(grep "${platform}_${arch}.zip" "${checksum_path}") ); then
+  if ! (cd "${TMP_DOWNLOAD_DIR}" && shasum -a 256 -c <(grep "${platform}_${arch}.zip" "${checksum_path}")); then
     echo "checksum verification failed" >&2
     return 2
   fi
@@ -134,17 +138,17 @@ get_download_url() {
   case "${type}" in
     zip)
       local -r filename="$(get_zip_filename "${version}")"
-    ;;
+      ;;
     checksum)
       local -r filename="$(get_checksum_filename "${version}")"
-    ;;
+      ;;
     gpg)
       local -r filename="$(get_gpg_filename "${version}")"
-    ;;
+      ;;
     *)
       echo "${type} is not a valid type of URL to download" >&2
       exit 1
-    ;;
+      ;;
   esac
   local -r releases_host="https://releases.hashicorp.com"
 
