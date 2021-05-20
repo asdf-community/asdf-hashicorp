@@ -23,7 +23,6 @@ TMP_DOWNLOAD_DIR="$(mktemp -d -t "asdf_${toolname}_XXXXXX")"
 readonly TMP_DOWNLOAD_DIR
 trap 'rm -rf "${TMP_DOWNLOAD_DIR?}"' EXIT
 
-SKIP_VERIFY=${ASDF_HASHICORP_SKIP_VERIFY:-"false"}
 gnupg() {
   # This is one of the rare times when we want word splitting, so we can supply
   # a caller-specified number of arguments to this function to `gpg` as
@@ -77,12 +76,8 @@ install() {
 
   echo "Downloading ${toolname} version ${version} from ${download_url}"
   if curl -fs "${download_url}" -o "${download_path}"; then
-    if command -v gpg >/dev/null 2>&1 && [ "${SKIP_VERIFY}" == "false" ]; then
-      echo "Verifying signatures and checksums"
-      verify "${version}" "${download_path}"
-    else
-      echo "Skipping verifying signatures and checksums either because gpg is not installed or explicitly skipped with ASDF_HASHICORP_SKIP_VERIFY"
-    fi
+    echo "Verifying signatures and checksums"
+    verify "${version}" "${download_path}"
 
     echo "Cleaning ${toolname} previous binaries"
     rm -rf "${bin_install_path:?}/${toolname}"
