@@ -6,9 +6,6 @@ setup() {
   # So we don't have to do rm -rf "${HOME}".
   TEMP_HOME="${HOME}"
   asdf_gitdir="$(dirname "${BATS_TEST_FILENAME}")/../.git"
-  asdf plugin-add terraform "${asdf_gitdir}"
-  asdf plugin-add vault "${asdf_gitdir}"
-  asdf plugin-add consul "${asdf_gitdir}"
 }
 
 teardown() {
