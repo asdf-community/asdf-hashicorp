@@ -1,15 +1,11 @@
 #!/usr/bin/env bats
 
-
-
 setup() {
   # Ensure a pristine homedir for tests.
   HOME="$(mktemp -d bats-asdf-hashicorp-XXXXXXXXXXXXXXX)"
   # So we don't have to do rm -rf "${HOME}".
   TEMP_HOME="${HOME}"
   asdf_gitdir="$(dirname "${BATS_TEST_FILENAME}")/../.git"
-  echo "asdf gitdir: $asdf_gitdir"
-  echo "${TEMP_HOME}" | grep "^/home" || rm -rf "${TEMP_HOME}/.asdf/plugins/"
 }
 
 teardown() {
