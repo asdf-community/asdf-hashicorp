@@ -4,7 +4,7 @@ setup() {
   ASDF_HASHICORP="$(dirname "$BATS_TEST_DIRNAME")"
   # If we put this in $BATS_RUN_TMPDIR, no teardown is required since it's
   # handled by bats.
-  ASDF_TMPDIR="$(mktemp -p "${BATS_RUN_TMPDIR}" -d "bats-asdf.XXXXXXXXXX")"
+  ASDF_TMPDIR="$(TMPDIR="${BATS_RUN_TMPDIR}" mktemp -t "test-${BATS_SUITE_TEST_NUMBER}.XXXXXXXXX" -d)"
   export ASDF_DATA_DIR="$(bats_readlinkf "${ASDF_TMPDIR}")"
   asdf plugin-add terraform "${ASDF_HASHICORP}"
   asdf plugin-add consul "${ASDF_HASHICORP}"
