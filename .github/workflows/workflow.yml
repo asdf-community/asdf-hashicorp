@@ -49,6 +49,9 @@ jobs:
 
       - name: Test plugin
         run: |
+          asdf plugin-add terraform $GITHUB_WORKSPACE
+          asdf plugin-add vault $GITHUB_WORKSPACE
+          asdf plugin-add consul $GITHUB_WORKSPACE
           make test
         env:
           GITHUB_API_TOKEN: ${{ github.token }}
