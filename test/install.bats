@@ -1,16 +1,16 @@
 #!/usr/bin/env bats
 
 setup() {
-  # Ensure a pristine homedir for tests.
-  HOME="$(mktemp -d bats-asdf-hashicorp-XXXXXXXXXXXXXXX)"
-  # So we don't have to do rm -rf "${HOME}".
-  TEMP_HOME="${HOME}"
-  asdf_gitdir="$(dirname "${BATS_TEST_FILENAME}")/../.git"
+  ASDF_HASHICORP="$(dirname "$BATS_TEST_DIRNAME")"
+  asdf plugin-add terraform "${ASDF_HASHICORP}"
+  asdf plugin-add vault "${ASDF_HASHICORP}"
+  asdf plugin-add consul "${ASDF_HASHICORP}"
 }
 
 teardown() {
-  # Further protection against removing anyone's real homedir.
-  echo "${TEMP_HOME}" | grep "^/home" || rm -rf "${TEMP_HOME}"
+  asdf plugin-remove terraform
+  asdf plugin-remove vault
+  asdf plugin-remove consul
 }
 
 @test "install command fails if the input is not version number" {
