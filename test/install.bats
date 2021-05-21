@@ -2,19 +2,16 @@
 
 setup() {
   ASDF_HASHICORP="$(dirname "$BATS_TEST_DIRNAME")"
+  # If we put this in $BATS_RUN_TMPDIR, no teardown is required since it's
+  # handled by bats.
+  ASDF_TMPDIR="$(mktemp -p "${BATS_RUN_TMPDIR}" -d "bats-asdf.XXXXXXXXXX")"
+  export ASDF_DATA_DIR="$(bats_readlinkf "${ASDF_TMPDIR}")"
   asdf plugin-add terraform "${ASDF_HASHICORP}"
-  asdf plugin-add vault "${ASDF_HASHICORP}"
   asdf plugin-add consul "${ASDF_HASHICORP}"
-}
-
-teardown() {
-  asdf plugin-remove terraform
-  asdf plugin-remove vault
-  asdf plugin-remove consul
+  asdf plugin-add vault "${ASDF_HASHICORP}"
 }
 
 @test "install command fails if the input is not version number" {
-  # Since each test gets its own homedir, we need to add the right plugins.
   run asdf install terraform ref
   [ "$status" -eq 1 ]
   echo "$output" | grep "supports release installs only"
