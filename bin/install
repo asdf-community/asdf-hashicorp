@@ -23,6 +23,46 @@ TMP_DOWNLOAD_DIR="$(mktemp -d -t "asdf_${toolname}_XXXXXX")"
 readonly TMP_DOWNLOAD_DIR
 trap 'rm -rf "${TMP_DOWNLOAD_DIR?}"' EXIT
 
+SKIP_VERIFY=${ASDF_HASHICORP_SKIP_VERIFY:-"false"}
+gnupg() {
+  # This is one of the rare times when we want word splitting, so we can supply
+  # a caller-specified number of arguments to this function to `gpg` as
+  # arguments.
+  #
+  # shellcheck disable=SC2068
+  GNUPGHOME="${TMP_DOWNLOAD_DIR}" gpg $@
+}
+
+verify() {
+  # Release archive checksum verification - see
+  # https://www.hashicorp.com/security
+  #
+  # Returns 1 on GPG signature verification error, 2 on checksum error.
+  local -r version="$1"
+  local -r platform="$(get_platform)"
+  local -r arch="$(get_arch)"
+  local -r checksum_path="${TMP_DOWNLOAD_DIR}/$(get_checksum_filename "${version}")"
+  local -r gpg_path="${TMP_DOWNLOAD_DIR}/$(get_gpg_filename "${version}")"
+
+  gnupg --import "${__dirname}/../hashicorp.asc"
+  if ! curl -fs "$(get_download_url "${version}" "checksum")" -o "${checksum_path}"; then
+    echo "couldn't download checksum file" >&2
+  fi
+  if ! curl -fs "$(get_download_url "${version}" "gpg" "72D7468F")" -o "${gpg_path}" &&
+    ! curl -fs "$(get_download_url "${version}" "gpg")" -o "${gpg_path}"; then
+    echo "couldn't download gpg signature file" >&2
+  fi
+
+  if ! gnupg --verify "${gpg_path}" "${checksum_path}"; then
+    echo "gpg verification failed" >&2
+    return 1
+  fi
+  if ! (cd "${TMP_DOWNLOAD_DIR}" && shasum -a 256 -c <(grep "${platform}_${arch}.zip" "${checksum_path}")); then
+    echo "checksum verification failed" >&2
+    return 2
+  fi
+}
+
 install() {
   local -r install_type="$1"
   local -r version="$2"
@@ -33,11 +73,18 @@ install() {
   fi
 
   local -r bin_install_path="${install_path}/bin"
-  local -r download_url="$(get_download_url "${version}")"
-  local -r download_path="${TMP_DOWNLOAD_DIR}/$(get_filename "${version}")"
+  local -r download_url="$(get_download_url "${version}" "zip")"
+  local -r download_path="${TMP_DOWNLOAD_DIR}/$(get_zip_filename "${version}")"
 
   echo "Downloading ${toolname} version ${version} from ${download_url}"
   if curl -fs "${download_url}" -o "${download_path}"; then
+    if command -v gpg >/dev/null 2>&1 && [ "${SKIP_VERIFY}" == "false" ]; then
+      echo "Verifying signatures and checksums"
+      verify "${version}" "${download_path}"
+    else
+      echo "Skipping verifying signatures and checksums either because gpg is not installed or explicitly skipped with ASDF_HASHICORP_SKIP_VERIFY"
+    fi
+
     echo "Cleaning ${toolname} previous binaries"
     rm -rf "${bin_install_path:?}/${toolname}"
 
@@ -73,16 +120,48 @@ get_arch() {
   fi
 }
 
-get_filename() {
+get_zip_filename() {
   local -r version="$1"
   local -r platform="$(get_platform)"
   local -r arch="$(get_arch)"
   echo "${toolname}_${version}_${platform}_${arch}.zip"
 }
 
+get_checksum_filename() {
+  local -r version="$1"
+  echo "${toolname}_${version}_SHA256SUMS"
+}
+
+get_gpg_filename() {
+  local -r version="$1"
+  local -r keyid="${2:-}"
+  if [[ -n ${keyid} ]]; then
+    echo "${toolname}_${version}_SHA256SUMS.${keyid}.sig"
+  else
+    echo "${toolname}_${version}_SHA256SUMS.sig"
+  fi
+}
+
 get_download_url() {
   local -r version="$1"
-  local -r filename="$(get_filename "${version}")"
+  local -r type="$2"
+  local -r keyid="${3:-}"
+
+  case "${type}" in
+    zip)
+      local -r filename="$(get_zip_filename "${version}")"
+      ;;
+    checksum)
+      local -r filename="$(get_checksum_filename "${version}")"
+      ;;
+    gpg)
+      local -r filename="$(get_gpg_filename "${version}" "${keyid}")"
+      ;;
+    *)
+      echo "${type} is not a valid type of URL to download" >&2
+      exit 1
+      ;;
+  esac
   local -r releases_host="https://releases.hashicorp.com"
 
   if ! curl -fs "${releases_host}/${toolname}/${version}/${filename}" >/dev/null && [[ ${filename} == *"arm64"* ]]; then

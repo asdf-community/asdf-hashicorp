@@ -48,9 +48,7 @@ jobs:
         run: brew install --build-from-source bats-core
 
       - name: Test plugin
-        run: |
-          asdf plugin-add terraform $GITHUB_WORKSPACE
-          make test
+        run: make test
         env:
           GITHUB_API_TOKEN: ${{ github.token }}
 
