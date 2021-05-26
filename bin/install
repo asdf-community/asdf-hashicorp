@@ -114,7 +114,7 @@ get_arch() {
     echo "$FORCE_ARCH"
   elif [[ $machine == "arm64" ]] || [[ $machine == "aarch64" ]]; then
     echo "arm64"
-  elif [[ $machine == *"arm"* ]] || [[ $machine == *"aarch"* ]; then
+  elif [[ $machine == *"arm"* ]] || [[ $machine == *"aarch"* ]]; then
     echo "arm"
   elif [[ $machine == *"386"* ]]; then
     echo "386"
