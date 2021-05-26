@@ -110,9 +110,17 @@ get_platform() {
 get_arch() {
   local -r machine="$(uname -m)"
   if [[ $machine == "arm64" ]] || [[ $machine == "aarch64" ]]; then
-    echo "arm64"
+    if [[ "$(get_platform)" != "darwin" ]]; then
+      echo "arm64"
+    else
+      echo "amd64"
+    fi
   elif [[ $machine == *"arm"* ]] || [[ $machine == *"aarch"* ]]; then
-    echo "arm"
+    if [[ "$(get_platform)" != "darwin" ]]; then
+      echo "arm"
+    else
+      echo "amd64"
+    fi
   elif [[ $machine == *"386"* ]]; then
     echo "386"
   else
