@@ -27,7 +27,7 @@ install & manage versions.
 
 ### Environment Variable Options
 - ASDF_HASHICORP_SKIP_VERIFY: skip verifying checksums and signatures
-- ASDF_HASHICORP_OVERWRITE_ARCH: forces the downloading of versions of the specified processor architecture rather it selecting versions with the processor architecture that it detects on your computer. Useful for example, for forcing M1 macs to use amd64 versions of terraform
+- ASDF_HASHICORP_OVERWRITE_ARCH: force the plugin to use a specified processor architecture rather than the automatically detected value. Useful, for example, for allowing users on M1 Macs to install `amd64` binaries when there's no `arm64` binary available.
 
 ## License
 
