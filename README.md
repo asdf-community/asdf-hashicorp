@@ -27,6 +27,7 @@ install & manage versions.
 
 ### Environment Variable Options
 - ASDF_HASHICORP_SKIP_VERIFY: skip verifying checksums and signatures
+- ASDF_HASHICORP_FORCE_ARCH: forces the downloading of versions of the specified processor architecture rather it selecting versions with the processor architecture that it detects on your computer. Useful for example, for forcing M1 macs to use amd64 versions of terraform
 
 ## License
 
