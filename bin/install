@@ -40,7 +40,7 @@ verify() {
   # Returns 1 on GPG signature verification error, 2 on checksum error.
   local -r version="$1"
   local -r platform="$(get_platform)"
-  local -r arch="$(get_arch ${platform})"
+  local -r arch="$(get_arch "${platform}")"
   local -r checksum_path="${TMP_DOWNLOAD_DIR}/$(get_checksum_filename "${version}")"
   local -r gpg_path="${TMP_DOWNLOAD_DIR}/$(get_gpg_filename "${version}")"
 
@@ -109,9 +109,9 @@ get_platform() {
 
 get_arch() {
   local -r machine="$(uname -m)"
-  if [[ $machine == "arm64" ]] || [[ $machine == "aarch64" ]] && [[ "$1" != "darwin" ]]; then
+  if [[ $machine == "arm64" ]] || [[ $machine == "aarch64" ]] && [[ $1 != "darwin" ]]; then
     echo "arm64"
-  elif [[ $machine == *"arm"* ]] || [[ $machine == *"aarch"* ]] && [[ "$1" != "darwin" ]]; then
+  elif [[ $machine == *"arm"* ]] || [[ $machine == *"aarch"* ]] && [[ $1 != "darwin" ]]; then
     echo "arm"
   elif [[ $machine == *"386"* ]]; then
     echo "386"
@@ -123,7 +123,7 @@ get_arch() {
 get_zip_filename() {
   local -r version="$1"
   local -r platform="$(get_platform)"
-  local -r arch="$(get_arch ${platform})"
+  local -r arch="$(get_arch "${platform}")"
   echo "${toolname}_${version}_${platform}_${arch}.zip"
 }
 
