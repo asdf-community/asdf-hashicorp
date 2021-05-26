@@ -110,8 +110,8 @@ get_platform() {
 get_arch() {
   local -r machine="$(uname -m)"
   OVERWRITE_ARCH=${ASDF_HASHICORP_FORCE_ARCH:-"false"}
-  if [[ $FORCE_ARCH != "false" ]]; then
-    echo "$FORCE_ARCH"
+  if [[ $OVERWRITE_ARCH != "false" ]]; then
+    echo "$OVERWRITE_ARCH"
   elif [[ $machine == "arm64" ]] || [[ $machine == "aarch64" ]]; then
     echo "arm64"
   elif [[ $machine == *"arm"* ]] || [[ $machine == *"aarch"* ]]; then
