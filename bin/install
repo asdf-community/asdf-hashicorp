@@ -57,7 +57,11 @@ verify() {
     echo "gpg verification failed" >&2
     return 1
   fi
-  if ! (cd "${TMP_DOWNLOAD_DIR}" && shasum -a 256 -c <(grep "${platform}_${arch}.zip" "${checksum_path}")); then
+  shasum_command="shasum -a 256"
+  if ! command -v shasum &>/dev/null; then
+    shasum_command=sha256sum
+  fi
+  if ! (cd "${TMP_DOWNLOAD_DIR}" && ${shasum_command} -c <(grep "${platform}_${arch}.zip" "${checksum_path}")); then
     echo "checksum verification failed" >&2
     return 2
   fi
