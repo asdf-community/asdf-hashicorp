@@ -6,18 +6,15 @@ get_legacy_version() {
   local -r current_plugin="$1"
   local -r version_file="$2"
   local -r plugins_dir="${ASDF_DATA_DIR:-$HOME/.asdf}/plugins"
+  local -r supported_plugins=(terraform packer)
 
-  local read_file=0
-  if [[ "${current_plugin}" =~ "${plugins_dir}/terraform" && "${version_file}" == *".terraform-version" ]]; then
-    read_file=1
-  elif [[ "${current_plugin}" =~ "${plugins_dir}/packer" && "${version_file}" == *".packer-version" ]]; then
-    read_file=1
-  fi
-
-  # Get version from .terraform-version/.packer-version file (used by tfenv/pkenv)
-  if [[ ${read_file} == 1 && -r "${version_file}" ]]; then
-    cat "${version_file}"
-  fi
+  # check if current plugin is supported and with a readable legacy file
+  for plugin in "${supported_plugins[@]}"; do
+    if [[ ${current_plugin} =~ ${plugins_dir}/${plugin} &&
+      ${version_file} == *".${plugin}-version" && -r ${version_file} ]]; then
+      cat "${version_file}"
+    fi
+  done
 }
 
 get_legacy_version "$0" "$1"
