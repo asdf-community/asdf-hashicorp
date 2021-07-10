@@ -3,15 +3,20 @@
 set -Eeuo pipefail
 
 get_legacy_version() {
-  local -r plugin_dir="$1"
-  local -r tf_version_file="$2"
-  local -r terraform_dir="${ASDF_DATA_DIR:-$HOME/.asdf}/plugins/terraform"
+  local -r current_plugin="$1"
+  local -r version_file="$2"
+  local -r plugins_dir="${ASDF_DATA_DIR:-$HOME/.asdf}/plugins"
 
-  if [[ $plugin_dir =~ $terraform_dir ]]; then
-    # Get version from .terraform-version file (used by tfenv)
-    if [[ -r ${tf_version_file} ]]; then
-      cat "${tf_version_file}"
-    fi
+  local read_file=0
+  if [[ "${current_plugin}" =~ "${plugins_dir}/terraform" && "${version_file}" == *".terraform-version" ]]; then
+    read_file=1
+  elif [[ "${current_plugin}" =~ "${plugins_dir}/packer" && "${version_file}" == *".packer-version" ]]; then
+    read_file=1
+  fi
+
+  # Get version from .terraform-version/.packer-version file (used by tfenv/pkenv)
+  if [[ ${read_file} == 1 && -r "${version_file}" ]]; then
+    cat "${version_file}"
   fi
 }
 
