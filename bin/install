@@ -104,7 +104,8 @@ install() {
 }
 
 get_platform() {
-  if [ "$OSTYPE" == "msys" ]; then
+  local -r kernel="$(uname -s)"
+  if [[ $OSTYPE == "msys" || $kernel == "CYGWIN"* || $kernel == "MINGW"* ]]; then
     echo windows
   else
     uname | tr '[:upper:]' '[:lower:]'
