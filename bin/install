@@ -114,7 +114,7 @@ get_platform() {
 
 get_arch() {
   local -r machine="$(uname -m)"
-  local -r upper_toolname="$(echo ${toolname} | tr '[:upper:]' '[:lower:]')"
+  local -r upper_toolname=$(echo "${toolname}" | tr '[:upper:]' '[:lower:]')
   local -r tool_specific_arch_override="ASDF_HASHICORP_OVERWRITE_ARCH_${upper_toolname}"
 
   OVERWRITE_ARCH_TOOL=${!tool_specific_arch_override:-"false"}
