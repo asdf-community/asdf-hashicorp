@@ -15,7 +15,7 @@ list_all() {
 
   for v in $(curl -s "https://releases.hashicorp.com/${toolname}/" |
     grep -o "${toolname}_[0-9]\+\.[0-9]\+\.[0-9]\+\(\(-\|+\)[a-z]\+[0-9]*\)*"); do
-    version="${v#${toolname}_}"
+    version="${v#"${toolname}"_}"
     if [[ -z ${versions} ]]; then
       versions="${version}"
     else
