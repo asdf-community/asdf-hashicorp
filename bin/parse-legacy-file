@@ -3,18 +3,15 @@
 set -Eeuo pipefail
 
 get_legacy_version() {
-  local -r current_plugin="$1"
-  local -r version_file="$2"
-  local -r plugins_dir="${ASDF_DATA_DIR:-$HOME/.asdf}/plugins"
+  local -r version_file="$1"
   local -r supported_plugins=(terraform packer)
 
   # check if current plugin is supported and with a readable legacy file
   for plugin in "${supported_plugins[@]}"; do
-    if [[ ${current_plugin} =~ ${plugins_dir}/${plugin} &&
-      ${version_file} == *".${plugin}-version" && -r ${version_file} ]]; then
+    if [[ ${version_file} == *".${plugin}-version" && -r ${version_file} ]]; then
       cat "${version_file}"
     fi
   done
 }
 
-get_legacy_version "$0" "$1"
+get_legacy_version "$1"
