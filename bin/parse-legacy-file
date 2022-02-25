@@ -12,6 +12,17 @@ get_legacy_version() {
       cat "${version_file}"
     fi
   done
+
+  if [[ "${version_file}" =~ "main.tf"  ]]; then
+    grep --no-filename \
+         --recursive \
+         --fixed-strings \
+         --exclude-dir .terraform \
+         required_version \
+         "$(dirname "${version_file}")" \
+      | sed -e 's/required_version\s*=\s*"=\(.*\)"/\1/' \
+      | tr -d ' '
+  fi
 }
 
 get_legacy_version "$1"
