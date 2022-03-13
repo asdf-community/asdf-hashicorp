@@ -10,6 +10,18 @@ get_legacy_version() {
   for plugin in "${supported_plugins[@]}"; do
     if [[ ${version_file} == *".${plugin}-version" && -r ${version_file} ]]; then
       cat "${version_file}"
+    elif [[ "${version_file}" =~ "main.tf"  ]]; then
+      required_version_constraint="$(grep --no-filename \
+           --recursive \
+           --fixed-strings \
+           --exclude-dir .terraform \
+           required_version \
+           "${version_file}" \
+        | sed -e 's/\s*required_version\s*=//' \
+        | tr -d '"')"
+
+      grep -E '^\s*=?\s*\d+\.\d+.\d+' <<<"${required_version_constraint}" \
+        | tr -d '= '
     fi
   done
 
