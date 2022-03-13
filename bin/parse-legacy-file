@@ -2,38 +2,55 @@
 
 set -Eeuo pipefail
 
+THIS_PLUGIN="$(basename "$(dirname "$(dirname "$0")")")"
+SUPPORTED_PLUGINS=(terraform packer)
+
+is_strict_equality_version_constraint() {
+  local -r version_constraint="$1"
+  grep --quiet -E '^=?\d+\.\d+.\d+' <<<"${version_constraint}"
+}
+
+read_version_from_main_tf() {
+  local -r version_file="$1"
+  local -r required_version_constraint="$(grep --no-filename \
+      --recursive \
+      --fixed-strings \
+      required_version \
+      "${version_file}" \
+    | sed -e 's/\s*required_version\s*=//' \
+    | tr -d '" ')"
+
+  if is_strict_equality_version_constraint "${required_version_constraint}"; then
+    tr -d '=' <<<"${required_version_constraint}"
+  else
+    >&2 cat <<EOF
+FATAL: Found legacy version file 'main.tf' with unsupported required
+version constraint expression: '${required_version_constraint}'. This
+plugin only supports strict equality.
+
+EOF
+    exit 1
+  fi
+}
+
 get_legacy_version() {
   local -r version_file="$1"
-  local -r supported_plugins=(terraform packer)
+  local this_plugin_supported=false
 
-  # check if current plugin is supported and with a readable legacy file
-  for plugin in "${supported_plugins[@]}"; do
-    if [[ ${version_file} == *".${plugin}-version" && -r ${version_file} ]]; then
-      cat "${version_file}"
-    elif [[ "${version_file}" =~ "main.tf"  ]]; then
-      required_version_constraint="$(grep --no-filename \
-           --recursive \
-           --fixed-strings \
-           --exclude-dir .terraform \
-           required_version \
-           "${version_file}" \
-        | sed -e 's/\s*required_version\s*=//' \
-        | tr -d '"')"
-
-      grep -E '^\s*=?\s*\d+\.\d+.\d+' <<<"${required_version_constraint}" \
-        | tr -d '= '
+  # check if current plugin is supported
+  for plugin in "${SUPPORTED_PLUGINS[@]}"; do
+    if [[ ${plugin} == "${THIS_PLUGIN}" ]]; then
+      this_plugin_supported=true
+      break
     fi
   done
 
-  if [[ "${version_file}" =~ "main.tf"  ]]; then
-    grep --no-filename \
-         --recursive \
-         --fixed-strings \
-         --exclude-dir .terraform \
-         required_version \
-         "$(dirname "${version_file}")" \
-      | sed -e 's/required_version\s*=\s*"=\(.*\)"/\1/' \
-      | tr -d ' '
+  [[ "${this_plugin_supported}" == false ]] && return 0
+
+  if [[ ${version_file} == *".${THIS_PLUGIN}-version" && -r ${version_file} ]]; then
+    cat "${version_file}"
+  elif [[ ${version_file} =~ main.tf && -r ${version_file} ]]; then
+    read_version_from_main_tf "${version_file}"
   fi
 }
 
