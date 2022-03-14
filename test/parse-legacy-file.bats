@@ -15,7 +15,7 @@ terraform {
 }
 EOF
 
-  local -r actual_terraform_version="$("${PARSE_LEGACY_FILE}" "${version_file}")"
+  local -r actual_terraform_version="$(ASDF_HASHICORP_THIS_PLUGIN=terraform "${PARSE_LEGACY_FILE}" "${version_file}")"
 
   [[ "${actual_terraform_version}" == "${expected_terraform_version}" ]]
 }
@@ -30,7 +30,7 @@ terraform {
 }
 EOF
 
-  local -r actual_terraform_version="$("${PARSE_LEGACY_FILE}" "${version_file}")"
+  local -r actual_terraform_version="$(ASDF_HASHICORP_THIS_PLUGIN=terraform "${PARSE_LEGACY_FILE}" "${version_file}")"
 
   [[ "${actual_terraform_version}" == "${expected_terraform_version}" ]]
 }
@@ -42,7 +42,7 @@ EOF
 
   echo "${expected_terraform_version}" > "${tmpdir}/.terraform-version"
 
-  local -r actual_terraform_version="$("${PARSE_LEGACY_FILE}" "${version_file}")"
+  local -r actual_terraform_version="$(ASDF_HASHICORP_THIS_PLUGIN=terraform "${PARSE_LEGACY_FILE}" "${version_file}")"
 
   [[ "${actual_terraform_version}" == "${expected_terraform_version}" ]]
 }
@@ -56,7 +56,7 @@ terraform {
 }
 EOF
 
-  local -r actual_terraform_version="$("${PARSE_LEGACY_FILE}" "${version_file}")"
+  local -r actual_terraform_version="$(ASDF_HASHICORP_THIS_PLUGIN=terraform "${PARSE_LEGACY_FILE}" "${version_file}")"
 
   [[ "${actual_terraform_version}" == "" ]]
 }
@@ -70,7 +70,7 @@ terraform {
 }
 EOF
 
-  local -r actual_terraform_version="$("${PARSE_LEGACY_FILE}" "${version_file}")"
+  local -r actual_terraform_version="$(ASDF_HASHICORP_THIS_PLUGIN=terraform "${PARSE_LEGACY_FILE}" "${version_file}")"
 
   [[ "${actual_terraform_version}" == "" ]]
 }
@@ -84,7 +84,7 @@ terraform {
 }
 EOF
 
-  local -r actual_terraform_version="$("${PARSE_LEGACY_FILE}" "${version_file}")"
+  local -r actual_terraform_version="$(ASDF_HASHICORP_THIS_PLUGIN=terraform "${PARSE_LEGACY_FILE}" "${version_file}")"
 
   [[ "${actual_terraform_version}" == "" ]]
 }
@@ -98,7 +98,7 @@ terraform {
 }
 EOF
 
-  local -r actual_terraform_version="$("${PARSE_LEGACY_FILE}" "${version_file}")"
+  local -r actual_terraform_version="$(ASDF_HASHICORP_THIS_PLUGIN=terraform "${PARSE_LEGACY_FILE}" "${version_file}")"
 
   [[ "${actual_terraform_version}" == "" ]]
 }
@@ -112,7 +112,7 @@ terraform {
 }
 EOF
 
-  local -r actual_terraform_version="$("${PARSE_LEGACY_FILE}" "${version_file}")"
+  local -r actual_terraform_version="$(ASDF_HASHICORP_THIS_PLUGIN=terraform "${PARSE_LEGACY_FILE}" "${version_file}")"
 
   [[ "${actual_terraform_version}" == "" ]]
 }
@@ -130,7 +130,7 @@ EOF
 
   echo 'foo' > "${tmpdir}/.packer-version"
 
-  local -r actual_terraform_version="$("${PARSE_LEGACY_FILE}" "${version_file}")"
+  local -r actual_terraform_version="$(ASDF_HASHICORP_THIS_PLUGIN=terraform "${PARSE_LEGACY_FILE}" "${version_file}")"
 
   [[ "${actual_terraform_version}" == "${expected_terraform_version}" ]]
 }
