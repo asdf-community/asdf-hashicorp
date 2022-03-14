@@ -20,7 +20,7 @@ read_version_from_main_tf() {
     --fixed-strings \
     required_version \
     "${version_file}" |
-    sed -e 's/\s*required_version\s*=//' |
+    sed -E 's/[[:space:]]*required_version[[:space:]]*=//' |
     tr -d '" ')"
 
   if is_strict_equality_version_constraint "${required_version_constraint}"; then
