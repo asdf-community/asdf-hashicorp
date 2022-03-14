@@ -2,19 +2,59 @@
 
 set -Eeuo pipefail
 
-get_legacy_version() {
-  local -r current_plugin="$1"
-  local -r version_file="$2"
-  local -r plugins_dir="${ASDF_DATA_DIR:-$HOME/.asdf}/plugins"
-  local -r supported_plugins=(terraform packer)
+[[ -n ${DEBUG:-} ]] && set -x
 
-  # check if current plugin is supported and with a readable legacy file
-  for plugin in "${supported_plugins[@]}"; do
-    if [[ ${current_plugin} =~ ${plugins_dir}/${plugin} &&
-      ${version_file} == *".${plugin}-version" && -r ${version_file} ]]; then
-      cat "${version_file}"
-    fi
-  done
+# override is exposed for testing purposes.
+THIS_PLUGIN="${ASDF_HASHICORP_THIS_PLUGIN:-"$(basename "$(dirname "$(dirname "$0")")")"}"
+SUPPORTED_PLUGINS=(terraform packer)
+
+is_strict_equality_version_constraint() {
+  local -r version_constraint="$1"
+  grep --quiet -E '^=?[[:digit:]]+\.[[:digit:]]+.[[:digit:]]+' <<<"${version_constraint}"
 }
 
-get_legacy_version "$0" "$1"
+read_version_from_main_tf() {
+  local -r version_file="$1"
+  local -r required_version_constraint="$(grep --no-filename \
+    --recursive \
+    --fixed-strings \
+    required_version \
+    "${version_file}" |
+    sed -E 's/[[:space:]]*required_version[[:space:]]*=//' |
+    tr -d '" ')"
+
+  if is_strict_equality_version_constraint "${required_version_constraint}"; then
+    tr -d '=' <<<"${required_version_constraint}"
+  else
+    cat >&2 <<EOF
+FATAL: Found legacy version file 'main.tf' with unsupported required
+version constraint expression: '${required_version_constraint}'. This
+plugin only supports strict equality.
+
+EOF
+    exit 1
+  fi
+}
+
+get_legacy_version() {
+  local -r version_file="$1"
+  local this_plugin_supported=false
+
+  # check if current plugin is supported
+  for plugin in "${SUPPORTED_PLUGINS[@]}"; do
+    if [[ ${plugin} == "${THIS_PLUGIN}" ]]; then
+      this_plugin_supported=true
+      break
+    fi
+  done
+
+  [[ ${this_plugin_supported} == false ]] && return 0
+
+  if [[ ${version_file} == *".${THIS_PLUGIN}-version" && -r ${version_file} ]]; then
+    cat "${version_file}"
+  elif [[ ${version_file} =~ main.tf && -r ${version_file} ]]; then
+    read_version_from_main_tf "${version_file}"
+  fi
+}
+
+get_legacy_version "$1"
