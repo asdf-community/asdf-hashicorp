@@ -10,7 +10,7 @@ SUPPORTED_PLUGINS=(terraform packer)
 
 is_strict_equality_version_constraint() {
   local -r version_constraint="$1"
-  grep --quiet -E '^=?\d+\.\d+.\d+' <<<"${version_constraint}"
+  grep --quiet -E '^=?[[:digit:]]+\.[[:digit:]]+.[[:digit:]]+' <<<"${version_constraint}"
 }
 
 read_version_from_main_tf() {
