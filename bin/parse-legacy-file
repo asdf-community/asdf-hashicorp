@@ -2,7 +2,7 @@
 
 set -Eeuo pipefail
 
-[[ -n "${DEBUG:-}" ]] && set -x
+[[ -n ${DEBUG:-} ]] && set -x
 
 # override is exposed for testing purposes.
 THIS_PLUGIN="${ASDF_HASHICORP_THIS_PLUGIN:-"$(basename "$(dirname "$(dirname "$0")")")"}"
@@ -16,17 +16,17 @@ is_strict_equality_version_constraint() {
 read_version_from_main_tf() {
   local -r version_file="$1"
   local -r required_version_constraint="$(grep --no-filename \
-      --recursive \
-      --fixed-strings \
-      required_version \
-      "${version_file}" \
-    | sed -e 's/\s*required_version\s*=//' \
-    | tr -d '" ')"
+    --recursive \
+    --fixed-strings \
+    required_version \
+    "${version_file}" |
+    sed -e 's/\s*required_version\s*=//' |
+    tr -d '" ')"
 
   if is_strict_equality_version_constraint "${required_version_constraint}"; then
     tr -d '=' <<<"${required_version_constraint}"
   else
-    >&2 cat <<EOF
+    cat >&2 <<EOF
 FATAL: Found legacy version file 'main.tf' with unsupported required
 version constraint expression: '${required_version_constraint}'. This
 plugin only supports strict equality.
@@ -48,7 +48,7 @@ get_legacy_version() {
     fi
   done
 
-  [[ "${this_plugin_supported}" == false ]] && return 0
+  [[ ${this_plugin_supported} == false ]] && return 0
 
   if [[ ${version_file} == *".${THIS_PLUGIN}-version" && -r ${version_file} ]]; then
     cat "${version_file}"
