@@ -23,6 +23,8 @@ read_version_from_main_tf() {
     sed -E 's/[[:space:]]*required_version[[:space:]]*=//' |
     tr -d '" ')"
 
+  [[ -z ${required_version_constraint} ]] && return 0
+
   if is_strict_equality_version_constraint "${required_version_constraint}"; then
     tr -d '=' <<<"${required_version_constraint}"
   else

@@ -134,3 +134,13 @@ EOF
 
   [[ "${actual_terraform_version}" == "${expected_terraform_version}" ]]
 }
+
+@test "does not output error if required_version is not specified" {
+  local -r tmpdir="$(mktemp -d)"
+  local -r version_file="${tmpdir}/main.tf"
+  touch "${version_file}"
+
+  local -r actual_terraform_version="$(ASDF_HASHICORP_THIS_PLUGIN=terraform "${PARSE_LEGACY_FILE}" "${version_file}" 2>&1)"
+
+  [[ "${actual_terraform_version}" == "" ]]
+}
