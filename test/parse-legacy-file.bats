@@ -20,6 +20,21 @@ EOF
   [[ "${actual_terraform_version}" == "${expected_terraform_version}" ]]
 }
 
+@test "supports alternate file for terraform version constraints" {
+  local -r expected_terraform_version=0.13.7
+  local -r tmpdir="$(mktemp -d)"
+  local -r version_file="${tmpdir}/versions.tf"
+  cat <<EOF > "${version_file}"
+terraform {
+  required_version = "= ${expected_terraform_version}"
+}
+EOF
+
+  local -r actual_terraform_version="$(ASDF_HASHICORP_TERRAFORM_VERSION_FILE=versions.tf ASDF_HASHICORP_THIS_PLUGIN=terraform "${PARSE_LEGACY_FILE}" "${version_file}")"
+
+  [[ "${actual_terraform_version}" == "${expected_terraform_version}" ]]
+}
+
 @test "supports legacy terraform version 'required_version' with strict equality, no equals literal" {
   local -r expected_terraform_version=0.13.7
   local -r tmpdir="$(mktemp -d)"

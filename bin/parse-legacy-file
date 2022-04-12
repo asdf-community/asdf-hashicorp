@@ -29,7 +29,7 @@ read_version_from_main_tf() {
     tr -d '=' <<<"${required_version_constraint}"
   else
     cat >&2 <<EOF
-FATAL: Found legacy version file 'main.tf' with unsupported required
+FATAL: Found legacy version file '${ASDF_HASHICORP_TERRAFORM_VERSION_FILE:-main.tf}' with unsupported required
 version constraint expression: '${required_version_constraint}'. This
 plugin only supports strict equality.
 
@@ -54,7 +54,7 @@ get_legacy_version() {
 
   if [[ ${version_file} == *".${THIS_PLUGIN}-version" && -r ${version_file} ]]; then
     cat "${version_file}"
-  elif [[ ${version_file} =~ main.tf && -r ${version_file} ]]; then
+  elif [[ ${version_file} =~ ${ASDF_HASHICORP_TERRAFORM_VERSION_FILE:-main.tf} && -r ${version_file} ]]; then
     read_version_from_main_tf "${version_file}"
   fi
 }
