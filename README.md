@@ -29,6 +29,7 @@ install & manage versions.
 - ASDF_HASHICORP_SKIP_VERIFY: skip verifying checksums and signatures
 - ASDF_HASHICORP_OVERWRITE_ARCH: force the plugin to use a specified processor architecture rather than the automatically detected value. Useful, for example, for allowing users on M1 Macs to install `amd64` binaries when there's no `arm64` binary available.
 - ASDF_HASHICORP_OVERWRITE_ARCH_<specific tool>: like the previous override, but for each specific tool, e.g. ASDF_HASHICORP_OVERWRITE_ARCH_TERRAFORM. Works with ASDF_HASHICORP_OVERWRITE_ARCH, and tool-specific overrides take precedence.
+- ASDF_HASHICORP_TERRAFORM_VERSION_FILE: Which `.tf`-file to examine for version constraints when using the `legacy_version_file` option in `~/.asdfrc`. Defaults to `main.tf`
 
 ## License
 
