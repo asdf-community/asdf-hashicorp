@@ -24,7 +24,6 @@ jobs:
           - serf
           - terraform
           - terraform-ls
-          - tfc-agent
           - vault
           - waypoint
 
