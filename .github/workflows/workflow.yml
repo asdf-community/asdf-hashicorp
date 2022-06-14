@@ -17,11 +17,14 @@ jobs:
         tool:
           - boundary
           - consul
+          - levant
           - nomad
           - packer
           - sentinel
           - serf
           - terraform
+          - terraform-ls
+          - tfc-agent
           - vault
           - waypoint
 
