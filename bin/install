@@ -105,7 +105,7 @@ install() {
 
 get_platform() {
   local -r kernel="$(uname -s)"
-  if [[ $OSTYPE == "msys" || $kernel == "CYGWIN"* || $kernel == "MINGW"* ]]; then
+  if [[ ${OSTYPE} == "msys" || ${kernel} == "CYGWIN"* || ${kernel} == "MINGW"* ]]; then
     echo windows
   else
     uname | tr '[:upper:]' '[:lower:]'
@@ -114,18 +114,18 @@ get_platform() {
 
 get_arch() {
   local -r machine="$(uname -m)"
-  local -r upper_toolname=$(echo "${toolname}" | tr '[:lower:]' '[:upper:]')
+  local -r upper_toolname=$(echo "${toolname//-/_}" | tr '[:lower:]' '[:upper:]')
   local -r tool_specific_arch_override="ASDF_HASHICORP_OVERWRITE_ARCH_${upper_toolname}"
 
   OVERWRITE_ARCH=${!tool_specific_arch_override:-${ASDF_HASHICORP_OVERWRITE_ARCH:-"false"}}
 
-  if [[ $OVERWRITE_ARCH != "false" ]]; then
-    echo "$OVERWRITE_ARCH"
-  elif [[ $machine == "arm64" ]] || [[ $machine == "aarch64" ]]; then
+  if [[ ${OVERWRITE_ARCH} != "false" ]]; then
+    echo "${OVERWRITE_ARCH}"
+  elif [[ ${machine} == "arm64" ]] || [[ ${machine} == "aarch64" ]]; then
     echo "arm64"
-  elif [[ $machine == *"arm"* ]] || [[ $machine == *"aarch"* ]]; then
+  elif [[ ${machine} == *"arm"* ]] || [[ ${machine} == *"aarch"* ]]; then
     echo "arm"
-  elif [[ $machine == *"386"* ]]; then
+  elif [[ ${machine} == *"386"* ]]; then
     echo "386"
   else
     echo "amd64"
