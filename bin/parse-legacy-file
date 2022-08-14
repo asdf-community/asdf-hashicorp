@@ -2,6 +2,8 @@
 
 set -Eeuo pipefail
 
+__dirname="$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 [[ -n ${DEBUG:-} ]] && set -x
 
 # override is exposed for testing purposes.
@@ -12,21 +14,243 @@ is_strict_equality_version_constraint() {
   local -r version_constraint="$1"
   grep --quiet -E '^=?[[:digit:]]+\.[[:digit:]]+.[[:digit:]]+' <<<"${version_constraint}"
 }
+function parse_version_constraint {
+  local constraint_var version_var
+  typeset -n constraint_var="$1"
+  typeset -n version_var="$2"
+  local -r required_version="$3"
+
+  for ((k=0;k<${#required_version};++k)); do
+    char="${required_version:k:1}"
+    case $char in
+    " ") ;;
+    "!"|"="|">"|"<"|"~")
+      constraint_var+="$char"
+      ;;
+    *)
+      version_var+="$char"
+      ;;
+    esac
+  done
+}
+
+is_version_eq() {
+  # note: we dont need the rest here, but they are passed into is_version_major_minor_eq
+  local -r allowed_patch="${3}"
+  local -r current_patch="${7}"
+
+  if ! is_version_major_minor_eq "$@"; then
+    return 1
+  fi
+
+  if (( allowed_patch == current_patch )); then
+    return 0
+  fi
+
+  return 1
+}
+
+is_stable() {
+  local -r current_rest="${1}"
+  [[ -z $current_rest ]]
+}
+
+is_version_major_minor_eq() {
+  local -r allowed_major="${1}"
+  local -r allowed_minor="${2}"
+  local -r allowed_patch="${3}"
+  local -r allowed_rest="${4}"
+  local -r current_major="${5}"
+  local -r current_minor="${6}"
+  local -r current_patch="${7}"
+  local -r current_rest="${8}"
+
+  if (( allowed_major == current_major )) && (( allowed_minor == current_minor )); then
+    return 0
+  fi
+
+  return 1
+}
+
+is_version_gt() {
+  local -r allowed_major="${1}"
+  local -r allowed_minor="${2}"
+  local -r allowed_patch="${3}"
+  local -r allowed_rest="${4}"
+  local -r current_major="${5}"
+  local -r current_minor="${6}"
+  local -r current_patch="${7}"
+  local -r current_rest="${8}"
+
+  if (( allowed_major < current_major )); then
+    return 0
+  fi
+
+  if (( allowed_major <= current_major )) && (( allowed_minor < current_minor )); then
+    return 0
+  fi
+
+  if (( allowed_major <= current_major )) && (( allowed_minor <= current_minor )) && (( allowed_patch < current_patch )); then
+    return 0
+  fi
+
+  return 1
+}
+
+is_version_in_constraint() {
+  local -r required_version="$1"
+  local -r current_version="$2"
+
+  local constraint=""
+  local version=""
+  parse_version_constraint constraint version "$required_version"
+
+  local current_major current_minor current_patch current_rest
+  if [[ $current_version =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)?([0-9A-Za-z-]*)? ]]; then
+    current_major="${BASH_REMATCH[1]}"
+    current_minor="${BASH_REMATCH[2]:-0}"
+    current_patch="${BASH_REMATCH[3]:-0}"
+    current_rest="${BASH_REMATCH[4]}"
+  else
+    cat >&2 <<EOF
+FATAL: Failed to parse version ${current_version}
+EOF
+  fi
+
+  local allowed_version allowed_minor allowed_patch allowed_rest
+  if [[ $version =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)?([0-9A-Za-z-]*)? ]]; then
+    allowed_version="${BASH_REMATCH[1]}"
+    allowed_minor="${BASH_REMATCH[2]:-0}"
+    allowed_patch="${BASH_REMATCH[3]:-0}"
+    allowed_rest="${BASH_REMATCH[4]}"
+  else
+    cat >&2 <<EOF
+FATAL: Failed to parse version ${version}
+EOF
+  fi
+
+  case ${constraint:-} in
+  "" | "=")
+      if [[ -n $allowed_rest ]] && [[ $allowed_rest != "$current_rest" ]]; then
+        return 1
+      fi
+
+      if is_version_eq "$allowed_version" "$allowed_minor" "$allowed_patch" "$allowed_rest" "$current_major" "$current_minor" "$current_patch" "$current_rest"; then
+        return 0
+      fi
+    ;;
+
+  "!=")
+      if [[ -n $allowed_rest ]] && [[ $allowed_rest == "$current_rest" ]]; then
+        return 1
+      fi
+
+      if ! is_version_eq "$allowed_version" "$allowed_minor" "$allowed_patch" "$allowed_rest" "$current_major" "$current_minor" "$current_patch" "$current_rest"; then
+        return 0
+      fi
+    ;;
+
+  ">")
+      if ! is_stable "$current_rest"; then
+        return 1
+      fi
+
+      if is_version_eq "$allowed_version" "$allowed_minor" "$allowed_patch" "$allowed_rest" "$current_major" "$current_minor" "$current_patch" "$current_rest"; then
+        return 1
+      fi
+
+      if is_version_gt "$allowed_version" "$allowed_minor" "$allowed_patch" "$allowed_rest" "$current_major" "$current_minor" "$current_patch" "$current_rest"; then
+        return 0
+      fi
+    ;;
+
+  ">=")
+      if ! is_stable "$current_rest"; then
+        return 1
+      fi
+
+      if is_version_eq "$allowed_version" "$allowed_minor" "$allowed_patch" "$allowed_rest" "$current_major" "$current_minor" "$current_patch" "$current_rest"; then
+        return 0
+      fi
+
+      if is_version_gt "$allowed_version" "$allowed_minor" "$allowed_patch" "$allowed_rest" "$current_major" "$current_minor" "$current_patch" "$current_rest"; then
+        return 0
+      fi
+    ;;
+
+  "<")
+      if ! is_stable "$current_rest"; then
+        return 1
+      fi
+
+      if is_version_eq "$allowed_version" "$allowed_minor" "$allowed_patch" "$allowed_rest" "$current_major" "$current_minor" "$current_patch" "$current_rest"; then
+        return 1
+      fi
+
+      if ! is_version_gt "$allowed_version" "$allowed_minor" "$allowed_patch" "$allowed_rest" "$current_major" "$current_minor" "$current_patch" "$current_rest"; then
+        return 0
+      fi
+    ;;
+
+  "<=")
+      if ! is_stable "$current_rest"; then
+        return 1
+      fi
+
+      if is_version_eq "$allowed_version" "$allowed_minor" "$allowed_patch" "$allowed_rest" "$current_major" "$current_minor" "$current_patch" "$current_rest"; then
+        return 0
+      fi
+
+      if ! is_version_gt "$allowed_version" "$allowed_minor" "$allowed_patch" "$allowed_rest" "$current_major" "$current_minor" "$current_patch" "$current_rest"; then
+        return 0
+      fi
+    ;;
+
+  "~>")
+      if ! is_stable "$current_rest"; then
+        return 1
+      fi
+
+      if ! is_version_major_minor_eq "$allowed_version" "$allowed_minor" "$allowed_patch" "$allowed_rest" "$current_major" "$current_minor" "$current_patch" "$current_rest"; then
+        return 1
+      fi
+
+      if is_version_eq "$allowed_version" "$allowed_minor" "$allowed_patch" "$allowed_rest" "$current_major" "$current_minor" "$current_patch" "$current_rest"; then
+        return 0
+      fi
+
+      if is_version_gt "$allowed_version" "$allowed_minor" "$allowed_patch" "$allowed_rest" "$current_major" "$current_minor" "$current_patch" "$current_rest"; then
+        return 0
+      fi
+    ;;
+
+  esac
+
+  return 1
+}
 
 read_version_from_main_tf() {
   local -r version_file="$1"
-  local -r required_version_constraint="$(grep --no-filename \
-    --recursive \
-    --fixed-strings \
-    required_version \
-    "${version_file}" |
-    sed -E 's/[[:space:]]*required_version[[:space:]]*=//' |
-    tr -d '" ')"
+  local -r required_version_constraint="$(awk -F\" '/^\s*required_version\b*/{print $2}' "${version_file}")"
 
   [[ -z ${required_version_constraint} ]] && return 0
 
-  if is_strict_equality_version_constraint "${required_version_constraint}"; then
-    tr -d '=' <<<"${required_version_constraint}"
+  # todo doing this on every dir change is expensive. What is a good alternative?
+  local all_versions
+  IFS=" " read -r -a all_versions <<<"$("${__dirname}/list-all")"
+
+  local version
+  while read -d ',' -r version_constraint || [[ -n "$version_constraint" ]]; do
+    for idx in "${!all_versions[@]}"; do
+      version="${all_versions[idx]}"
+      if ! is_version_in_constraint "$version_constraint" "$version"; then
+        unset 'all_versions[idx]'
+      fi
+    done
+  done  <<<"$required_version_constraint"
+
+  if (( ${#all_versions[@]} > 0 )); then
+    printf '%s\n' "${all_versions[@]}" | sort -rV | head -n1
   else
     cat >&2 <<EOF
 FATAL: Found legacy version file '${ASDF_HASHICORP_TERRAFORM_VERSION_FILE:-main.tf}' with unsupported required
