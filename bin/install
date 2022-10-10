@@ -18,6 +18,8 @@ toolname="$(basename "$(dirname "${__dirname}")")"
 readonly __dirname
 readonly toolname
 
+SWITCH_ARCH=
+
 # make a temporary download directory with a cleanup hook
 TMP_DOWNLOAD_DIR="$(mktemp -d -t "asdf_${toolname}_XXXXXX")"
 readonly TMP_DOWNLOAD_DIR
@@ -40,7 +42,7 @@ verify() {
   # Returns 1 on GPG signature verification error, 2 on checksum error.
   local -r version="$1"
   local -r platform="$(get_platform)"
-  local -r arch="$(get_arch)"
+  local -r arch="${SWITCH_ARCH:-$(get_arch)}"
   local -r checksum_path="${TMP_DOWNLOAD_DIR}/$(get_checksum_filename "${version}")"
   local -r gpg_path="${TMP_DOWNLOAD_DIR}/$(get_gpg_filename "${version}")"
 
@@ -77,11 +79,13 @@ install() {
   fi
 
   local -r bin_install_path="${install_path}/bin"
-  local -r download_url="$(get_download_url "${version}" "zip")"
-  local -r download_path="${TMP_DOWNLOAD_DIR}/$(get_zip_filename "${version}")"
+  local download_url
+  download_url="$(get_download_url "${version}" "zip")"
+  local download_path
+  download_path="${TMP_DOWNLOAD_DIR}/$(get_zip_filename "${version}")"
 
   echo "Downloading ${toolname} version ${version} from ${download_url}"
-  if curl -fs "${download_url}" -o "${download_path}"; then
+  if download "${download_url}" "${download_path}"; then
     if command -v gpg >/dev/null 2>&1 && [ "${SKIP_VERIFY}" == "false" ]; then
       echo "Verifying signatures and checksums"
       verify "${version}" "${download_path}"
@@ -101,6 +105,27 @@ install() {
     echo "Error: ${toolname} version ${version} not found" >&2
     exit 1
   fi
+}
+
+download() {
+  if curl -fs "${download_url}" -o "${download_path}"; then
+    return 0
+  fi
+
+  if [ "$(get_arch)" != "arm64" ]; then 
+    return 1
+  fi
+
+  SWITCH_ARCH=amd64
+  download_url=${download_url/arm/amd64}
+  download_path=${download_path/arm64/amd64}
+  if [ "$(curl -sIw "%{http_code}"  -o /dev/null "${download_url}")" != "200" ]; then
+    return 1
+  fi
+
+  echo "M1 was detected, but there is no version available. Downloading the amd64 version to run with rosetta!"
+  echo "Downloading ${toolname} version ${version} from ${download_url}"
+  curl -fs "${download_url}" -o "${download_path}"
 }
 
 get_platform() {
