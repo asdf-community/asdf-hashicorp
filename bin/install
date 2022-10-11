@@ -15,8 +15,10 @@ fail() {
 # detect the tool name
 __dirname="$(cd -P "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 toolname="$(basename "$(dirname "${__dirname}")")"
+upper_toolname=$(echo "${toolname//-/_}" | tr '[:lower:]' '[:upper:]')
 readonly __dirname
 readonly toolname
+readonly upper_toolname
 
 # make a temporary download directory with a cleanup hook
 TMP_DOWNLOAD_DIR="$(mktemp -d -t "asdf_${toolname}_XXXXXX")"
@@ -97,10 +99,14 @@ install() {
 
     echo "Extracting ${toolname} archive"
     unzip -qq "${download_path}" -d "${bin_install_path}"
-  else
-    echo "Error: ${toolname} version ${version} not found" >&2
-    exit 1
+    return $?
   fi
+  echo "Error: ${toolname} version ${version} not found" >&2
+  if [ "$(get_arch)" == "arm64" ] && [ "$(get_platform)" == "darwin" ]; then
+    echo -e "\nARM Mac user, for retro-compatibility, fallback to amd64 version using the below command:" >&2
+    echo "  ASDF_HASHICORP_OVERWRITE_ARCH_${upper_toolname}=amd64 asdf install ${toolname} ${version}" >&2
+  fi
+  exit 1
 }
 
 get_platform() {
@@ -114,7 +120,6 @@ get_platform() {
 
 get_arch() {
   local -r machine="$(uname -m)"
-  local -r upper_toolname=$(echo "${toolname//-/_}" | tr '[:lower:]' '[:upper:]')
   local -r tool_specific_arch_override="ASDF_HASHICORP_OVERWRITE_ARCH_${upper_toolname}"
 
   OVERWRITE_ARCH=${!tool_specific_arch_override:-${ASDF_HASHICORP_OVERWRITE_ARCH:-"false"}}
