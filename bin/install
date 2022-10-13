@@ -99,6 +99,7 @@ install() {
     unzip -qq "${download_path}" -d "${bin_install_path}"
   else
     echo "Error: ${toolname} version ${version} not found" >&2
+    echo "Check documentation for alternatives https://github.com/asdf-community/asdf-hashicorp#usage" >&2
     exit 1
   fi
 }
