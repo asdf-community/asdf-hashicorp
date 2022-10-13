@@ -37,7 +37,7 @@ jobs:
           plugin: ${{ matrix.tool }}
 
   test:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
 
     steps:
       - name: Checkout code
@@ -55,7 +55,7 @@ jobs:
           GITHUB_API_TOKEN: ${{ github.token }}
 
   lint:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
 
     steps:
       - name: Checkout code
@@ -68,7 +68,7 @@ jobs:
         run: make lint
 
   format:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
 
     steps:
       - name: Checkout code
