@@ -62,35 +62,37 @@ EOF
   [[ "${actual_terraform_version}" == "${expected_terraform_version}" ]]
 }
 
-@test "does not support 'not equal' version constraint expressions" {
+@test "supports 'not equal' version constraint expressions" {
   local -r tmpdir="$(mktemp -d)"
   local -r version_file="${tmpdir}/main.tf"
   cat <<EOF > "${version_file}"
 terraform {
-  required_version = "!= 0.13.7"
+  required_version = "!= 0.13.7, <0.14.0"
+}
+EOF
+
+  printf ":%s:\n" "$actual_terraform_version" >&2
+
+  local -r actual_terraform_version="$(ASDF_HASHICORP_THIS_PLUGIN=terraform "${PARSE_LEGACY_FILE}" "${version_file}")"
+
+  [[ "${actual_terraform_version}" == "0.13.6" ]]
+}
+
+@test "supports 'greater than' version constraint expressions" {
+  local -r tmpdir="$(mktemp -d)"
+  local -r version_file="${tmpdir}/main.tf"
+  cat <<EOF > "${version_file}"
+terraform {
+  required_version = "> 0.13.7, <0.15.0"
 }
 EOF
 
   local -r actual_terraform_version="$(ASDF_HASHICORP_THIS_PLUGIN=terraform "${PARSE_LEGACY_FILE}" "${version_file}")"
 
-  [[ "${actual_terraform_version}" == "" ]]
+  [[ "${actual_terraform_version}" == "0.14.11" ]]
 }
 
-@test "does not support 'greater than' version constraint expressions" {
-  local -r tmpdir="$(mktemp -d)"
-  local -r version_file="${tmpdir}/main.tf"
-  cat <<EOF > "${version_file}"
-terraform {
-  required_version = "> 0.13.7"
-}
-EOF
-
-  local -r actual_terraform_version="$(ASDF_HASHICORP_THIS_PLUGIN=terraform "${PARSE_LEGACY_FILE}" "${version_file}")"
-
-  [[ "${actual_terraform_version}" == "" ]]
-}
-
-@test "does not support 'less than' version constraint expressions" {
+@test "supports 'less than' version constraint expressions" {
   local -r tmpdir="$(mktemp -d)"
   local -r version_file="${tmpdir}/main.tf"
   cat <<EOF > "${version_file}"
@@ -101,24 +103,25 @@ EOF
 
   local -r actual_terraform_version="$(ASDF_HASHICORP_THIS_PLUGIN=terraform "${PARSE_LEGACY_FILE}" "${version_file}")"
 
-  [[ "${actual_terraform_version}" == "" ]]
+  [[ "${actual_terraform_version}" == "0.13.6" ]]
 }
 
-@test "does not support squiggly arrow version constraint expressions" {
+@test "supports squiggly arrow version constraint expressions" {
   local -r tmpdir="$(mktemp -d)"
   local -r version_file="${tmpdir}/main.tf"
   cat <<EOF > "${version_file}"
 terraform {
-  required_version = "~> 0.13.7"
+  required_version = "~> 0.13.4"
 }
 EOF
 
   local -r actual_terraform_version="$(ASDF_HASHICORP_THIS_PLUGIN=terraform "${PARSE_LEGACY_FILE}" "${version_file}")"
 
-  [[ "${actual_terraform_version}" == "" ]]
+  [[ "${actual_terraform_version}" == "0.13.7" ]]
 }
 
-@test "does not support compound version constraint expressions" {
+@test "supports compound version constraint expressions" {
+  local -r expected_terraform_version=0.13.7
   local -r tmpdir="$(mktemp -d)"
   local -r version_file="${tmpdir}/main.tf"
   cat <<EOF > "${version_file}"
@@ -129,7 +132,7 @@ EOF
 
   local -r actual_terraform_version="$(ASDF_HASHICORP_THIS_PLUGIN=terraform "${PARSE_LEGACY_FILE}" "${version_file}")"
 
-  [[ "${actual_terraform_version}" == "" ]]
+  [[ "${actual_terraform_version}" == "${expected_terraform_version}" ]]
 }
 
 # https://github.com/asdf-community/asdf-hashicorp/pull/43#discussion_r816027246
