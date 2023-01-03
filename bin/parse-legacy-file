@@ -2,7 +2,7 @@
 
 set -Eeuo pipefail
 
-[[ -n ${DEBUG:-} ]] && set -x
+[[ -n ${DEBUG-} ]] && set -x
 
 # override is exposed for testing purposes.
 THIS_PLUGIN="${ASDF_HASHICORP_THIS_PLUGIN:-"$(basename "$(dirname "$(dirname "$0")")")"}"
