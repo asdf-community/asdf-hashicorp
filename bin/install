@@ -147,7 +147,7 @@ get_checksum_filename() {
 
 get_gpg_filename() {
   local -r version="$1"
-  local -r keyid="${2:-}"
+  local -r keyid="${2-}"
   if [[ -n ${keyid} ]]; then
     echo "${toolname}_${version}_SHA256SUMS.${keyid}.sig"
   else
@@ -158,7 +158,7 @@ get_gpg_filename() {
 get_download_url() {
   local -r version="$1"
   local -r type="$2"
-  local -r keyid="${3:-}"
+  local -r keyid="${3-}"
 
   case "${type}" in
     zip)
