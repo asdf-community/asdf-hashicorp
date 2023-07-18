@@ -1,13 +1,13 @@
-SH_SRCFILES = $(shell git ls-files "bin/*")
+SH_SRCFILES = $(shell git ls-files "bin/*" "test/*")
 SHFMT_BASE_FLAGS = -s -i 2 -ci
 
-fmt:
+format:
 	shfmt -w $(SHFMT_BASE_FLAGS) $(SH_SRCFILES)
-.PHONY: fmt
+.PHONY: format
 
-fmt-check:
+format-check:
 	shfmt -d $(SHFMT_BASE_FLAGS) $(SH_SRCFILES)
-.PHONY: fmt-check
+.PHONY: format-check
 
 lint:
 	shellcheck $(SH_SRCFILES)
