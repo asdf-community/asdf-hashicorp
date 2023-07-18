@@ -25,12 +25,7 @@ trap 'rm -rf "${TMP_DOWNLOAD_DIR?}"' EXIT
 
 SKIP_VERIFY=${ASDF_HASHICORP_SKIP_VERIFY:-"false"}
 gnupg() {
-  # This is one of the rare times when we want word splitting, so we can supply
-  # a caller-specified number of arguments to this function to `gpg` as
-  # arguments.
-  #
-  # shellcheck disable=SC2068
-  GNUPGHOME="${TMP_DOWNLOAD_DIR}" gpg $@
+  GNUPGHOME="${TMP_DOWNLOAD_DIR}" gpg "$@"
 }
 
 verify() {
