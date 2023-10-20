@@ -53,7 +53,7 @@ get_legacy_version() {
   [[ ${this_plugin_supported} == false ]] && return 0
 
   if [[ ${version_file} == *".${THIS_PLUGIN}-version" && -r ${version_file} ]]; then
-    cat "${version_file}"
+    sed -e 's/^latest:\^//g' <"$version_file"
   elif [[ ${version_file} =~ ${ASDF_HASHICORP_TERRAFORM_VERSION_FILE:-main.tf} && -r ${version_file} ]]; then
     read_version_from_main_tf "${version_file}"
   fi
