@@ -5,7 +5,8 @@ setup() {
   # If we put this in $BATS_RUN_TMPDIR, no teardown is required since it's
   # handled by bats.
   ASDF_TMPDIR="$(TMPDIR="${BATS_RUN_TMPDIR}" mktemp -t "test-${BATS_SUITE_TEST_NUMBER}.XXXXXXXXX" -d)"
-  export ASDF_DATA_DIR="$(bats_readlinkf "${ASDF_TMPDIR}")"
+  ASDF_DATA_DIR="$(bats_readlinkf "${ASDF_TMPDIR}")"
+  export ASDF_DATA_DIR
   asdf plugin-add terraform "${ASDF_HASHICORP}"
   asdf plugin-add consul "${ASDF_HASHICORP}"
   asdf plugin-add vault "${ASDF_HASHICORP}"
