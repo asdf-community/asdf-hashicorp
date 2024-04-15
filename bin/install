@@ -172,7 +172,7 @@ get_download_url() {
   esac
   local -r releases_host="https://releases.hashicorp.com"
 
-  if ! curl -fs "${releases_host}/${toolname}/${version}/${filename}" >/dev/null && [[ ${filename} == *"arm64"* ]]; then
+  if ! curl -fsI "${releases_host}/${toolname}/${version}/${filename}" >/dev/null && [[ ${filename} == *"arm64"* ]]; then
     echo "https://releases.hashicorp.com/${toolname}/${version}/${filename//arm64/arm}"
   else
     echo "https://releases.hashicorp.com/${toolname}/${version}/${filename}"
