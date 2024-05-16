@@ -173,7 +173,7 @@ get_download_url() {
       ;;
   esac
 
-  if ! curl -fs "${releases_host}/${toolname}/${version}/${filename}" >/dev/null && [[ ${filename} == *"arm64"* ]]; then
+  if ! curl --fail --silent --head "${releases_host}/${toolname}/${version}/${filename}" >/dev/null && [[ ${filename} == *"arm64"* ]]; then
     echo "${releases_host}/${toolname}/${version}/${filename//arm64/arm}"
   else
     echo "${releases_host}/${toolname}/${version}/${filename}"
