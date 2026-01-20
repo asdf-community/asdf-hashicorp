@@ -151,6 +151,8 @@ get_gpg_filename() {
 }
 
 get_download_url() {
+  releases_host=${ASDF_HASHICORP_RELEASES_HOST:-"https://releases.hashicorp.com"}
+
   local -r version="$1"
   local -r type="$2"
   local -r keyid="${3-}"
@@ -170,12 +172,11 @@ get_download_url() {
       exit 1
       ;;
   esac
-  local -r releases_host="https://releases.hashicorp.com"
 
   if ! curl --fail --silent --head "${releases_host}/${toolname}/${version}/${filename}" >/dev/null && [[ ${filename} == *"arm64"* ]]; then
-    echo "https://releases.hashicorp.com/${toolname}/${version}/${filename//arm64/arm}"
+    echo "${releases_host}/${toolname}/${version}/${filename//arm64/arm}"
   else
-    echo "https://releases.hashicorp.com/${toolname}/${version}/${filename}"
+    echo "${releases_host}/${toolname}/${version}/${filename}"
   fi
 }
 

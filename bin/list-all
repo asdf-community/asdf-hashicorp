@@ -9,11 +9,13 @@ readonly __dirname
 readonly toolname
 
 list_all() {
+  releases_host=${ASDF_HASHICORP_RELEASES_HOST:-"https://releases.hashicorp.com"}
+
   local versions=""
   local version
   local v
 
-  for v in $(curl -s "https://releases.hashicorp.com/${toolname}/" |
+  for v in $(curl -s "${releases_host}/${toolname}/" |
     grep -o "${toolname}_[0-9]\+\.[0-9]\+\.[0-9]\+\(\(-\|+\)[a-z]\+-\?[0-9]*\)*"); do
     version="${v#"${toolname}"_}"
     if [[ -z ${versions} ]]; then
